@@ -5,16 +5,16 @@ import TDAs.exceptions.FullADTException;
 import TDAs.structure.definition.LinkedListADT;
 import TDAs.structure.implementation.node.Nodo;
 
-public class StaticLinkedListADT implements LinkedListADT {
+public class StaticLinkedListADT<T> implements LinkedListADT<T> {
 
     private static final int CAPACIDAD = 100;
     private int size;
-    private Nodo head;
-    private Nodo lastNode;
+    private Nodo<T> head;
+    private Nodo<T> lastNode;
 
 
     @Override
-    public void add(int value) {
+    public void add(T value) {
         validateCapacity();
         Nodo node = new Nodo(value);
 
@@ -30,11 +30,11 @@ public class StaticLinkedListADT implements LinkedListADT {
     }
 
     @Override
-    public void insert(int index, int value) {
+    public void insert(int index, T value) {
         validateCapacity();
         validateIndexForInsert(index);
 
-        Nodo node = new Nodo(value);
+        Nodo<T> node = new Nodo<>(value);
 
         if (index == 0) {
             node.setNext(this.head);
@@ -89,10 +89,10 @@ public class StaticLinkedListADT implements LinkedListADT {
     }
 
     @Override
-    public int get(int index) {
+    public T get(int index) {
         validateIndex(index);
 
-        Nodo actualNode = this.head;
+        Nodo<T> actualNode = this.head;
         int actualIndex = 0;
 
         while(actualIndex != index){

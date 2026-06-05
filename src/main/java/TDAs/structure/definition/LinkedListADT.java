@@ -7,13 +7,13 @@ public interface LinkedListADT<T> {
      * Descripcion: Agrega el elemento a un indice.
      * Precondición: No tiene
      */
-    void add(int value);
+    void add(T value);
 
     /**
      * Descripcion: Agrega el elemento a un indice.
      * Precondición: No tiene.
      */
-    void insert(int index, int value);
+    void insert(int index, T value);
 
     /**
      * Descripcion: Elimina el elemento de un indice.
@@ -25,7 +25,7 @@ public interface LinkedListADT<T> {
      * Descripcion: Retorna el elemento de un indice.
      * Precondición: El indice debe existir.
      */
-    int get(int index);
+    T get(int index);
 
     /**
      * Descripcion: Retorna el tamaño de la lista.

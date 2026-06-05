@@ -5,7 +5,7 @@ import TDAs.exceptions.FullADTException;
 import TDAs.structure.definition.LinkedListADT;
 import TDAs.structure.implementation.node.Nodo;
 
-public class DynamicLinkedListADT implements LinkedListADT {
+public class DynamicLinkedListADT<T> implements LinkedListADT<T> {
 
     private Nodo head = null;
     private Nodo lastNode;
@@ -13,7 +13,7 @@ public class DynamicLinkedListADT implements LinkedListADT {
 
 
     @Override
-    public void add(int value) {
+    public void add(T value) {
 
         Nodo node = new Nodo(value); //ya apunta a null
 
@@ -28,7 +28,7 @@ public class DynamicLinkedListADT implements LinkedListADT {
     }
 
     @Override
-    public void insert(int index, int value) {
+    public void insert(int index, T value) {
         validateIndexForInsert(index);
 
 
@@ -98,10 +98,10 @@ public class DynamicLinkedListADT implements LinkedListADT {
 
 
     @Override
-    public int get(int index) {
+    public T get(int index) {
         validateIndex(index);
 
-        Nodo actualNode = this.head;
+        Nodo<T> actualNode = this.head;
         int actualIndex = 0;
 
         while(actualIndex != index){

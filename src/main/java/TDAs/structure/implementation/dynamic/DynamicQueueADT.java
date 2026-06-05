@@ -6,22 +6,22 @@ import TDAs.structure.definition.QueueADT;
 import TDAs.structure.implementation.node.Nodo;
 
 // Esta clase representa la implementacion dinamica del TDA Cola.
-public class DynamicQueueADT implements QueueADT {
+public class DynamicQueueADT<T> implements QueueADT<T> {
 
-    private Nodo front = null;
-    private Nodo back = null;
+    private Nodo<T> front = null;
+    private Nodo<T> back = null;
     private int size = 0;
 
     @Override
-    public int getElement() {
+    public T getElement() {
         validateNotEmpty();
 
         return this.front.getValue();
     }
 
     @Override
-    public void add(int value) {
-        Nodo node = new Nodo(value);
+    public void add(T value) {
+        Nodo<T> node = new Nodo(value);
 
         if (this.isEmpty()) {
             this.front = node;

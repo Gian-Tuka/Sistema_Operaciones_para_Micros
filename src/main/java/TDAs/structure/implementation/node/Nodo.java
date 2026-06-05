@@ -1,28 +1,28 @@
 package TDAs.structure.implementation.node;
 
-public class Nodo {
-    private int value;
-    private Nodo next = null;
+public class Nodo<T> {
+    private T value;
+    private Nodo<T> next = null;
 
 
 
-    public int getValue() {
+    public T getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(T value) {
         this.value = value;
     }
 
-    public Nodo getNext() {
+    public Nodo<T> getNext() {
         return next;
     }
 
-    public void setNext(Nodo next) {
+    public void setNext(Nodo<T> next) {
         this.next = next;
     }
 
-    public Nodo(int value){
+    public Nodo(T value){
         this.value = value;
         this.next = null;
     }

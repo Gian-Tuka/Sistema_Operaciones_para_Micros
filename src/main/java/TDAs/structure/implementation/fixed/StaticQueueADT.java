@@ -4,11 +4,11 @@ import TDAs.exceptions.EmptyADTException;
 import TDAs.exceptions.FullADTException;
 import TDAs.structure.definition.QueueADT;
 
-public class StaticQueueADT implements QueueADT {
+public class StaticQueueADT<T> implements QueueADT<T> {
 
 
     private static final int CAPACITY = 100;
-    private int[] data;
+    private Object[] data;
     private int front;
     private int back;
     private int size;
@@ -16,7 +16,7 @@ public class StaticQueueADT implements QueueADT {
 
 
     public StaticQueueADT(){
-        this.data = new int[CAPACITY];
+        this.data = new Object[CAPACITY];
         this.front = -1;
         this.back = -1;
         this.size = 0;
@@ -26,10 +26,10 @@ public class StaticQueueADT implements QueueADT {
      * Precondición: La estructura debe tener elementos.
      */
     @Override
-    public int getElement() {
+    public T getElement() {
         validateNotEmpty();
 
-        return this.data[front];
+        return (T) this.data[front];
     }
 
 
@@ -39,7 +39,7 @@ public class StaticQueueADT implements QueueADT {
      * capacidad.
      */
     @Override
-    public void add(int value) {
+    public void add(T value) {
         validateCapacity();
 
         if (this.back + 1 == CAPACITY){
