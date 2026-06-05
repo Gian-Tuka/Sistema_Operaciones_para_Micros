@@ -3,4 +3,4 @@ Este es un Trabajo Practico Integrador y Obligatorio de la materia "Algoritmos y
 
 ## Authors
 - [Gianluca Lavinia - Lu. 1214519](https://www.github.com/Gian-Tuka)
-- [Nicolas Zuccarello - Lu. xxxxxxx](https://www.github.com/NicolasdeZucca)
+- [Nicolas Zuccarello - Lu. 1215660](https://www.github.com/NicolasdeZucca)
