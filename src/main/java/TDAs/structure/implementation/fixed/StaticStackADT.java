@@ -5,15 +5,15 @@ import TDAs.exceptions.FullADTException;
 import TDAs.structure.definition.StackADT;
 
 // Esta clase representa la implementacion estatica del TDA Pila.
-public class StaticStackADT implements StackADT {
+public class StaticStackADT<T> implements StackADT<T> {
 
     private static final int CAPACITY = 100;
-    private int[] data;
+    private Object[] data;
     private int top;
 
 
     public StaticStackADT(){
-        this.data = new int[CAPACITY];
+        this.data = new Object[CAPACITY];
         this.top = -1;
     }
     /**
@@ -21,9 +21,9 @@ public class StaticStackADT implements StackADT {
      * Precondición: La estructura debe tener elementos.
      */
     @Override
-    public int getElement() {
+    public T getElement() {
         validateNotEmpty();
-        return this.data[top];
+        return (T) this.data[top];
     }
 
 
@@ -33,7 +33,7 @@ public class StaticStackADT implements StackADT {
      * capacidad.
      */
     @Override
-    public void add(int value) {
+    public void add(T value) {
         validateCapacity();
         this.top++;
         this.data[top] = value;

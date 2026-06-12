@@ -5,10 +5,10 @@ import TDAs.structure.definition.StackADT;
 import TDAs.structure.implementation.node.Nodo;
 
 // Esta clase representa la implementacion dinamica del TDA Pila.
-public class DynamicStackADT implements StackADT {
+public class DynamicStackADT<T> implements StackADT<T> {
 
 
-    private Nodo top = null;
+    private Nodo<T> top = null;
     private int size = 0;
 
     /**
@@ -16,7 +16,7 @@ public class DynamicStackADT implements StackADT {
      * Precondición: La estructura debe tener elementos.
      */
     @Override
-    public int getElement() {
+    public T getElement() {
         validateNotEmpty();
             return this.top.getValue();
     }
@@ -28,9 +28,9 @@ public class DynamicStackADT implements StackADT {
      * capacidad.
      */
     @Override
-    public void add(int value) {
+    public void add(T value) {
 
-        Nodo node = new Nodo(value);
+        Nodo<T> node = new Nodo(value);
 
         node.setNext(this.top);
         this.top = node;
