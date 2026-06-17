@@ -74,11 +74,15 @@ public class DinamicGraphADT<T> implements GraphADT<T>{
 
     @Override
     public void addEdge(T vertxOne, T vertxTwo, int weight) {
-        addVertx(vertxOne);
-        addVertx(vertxTwo);
+        if (!vertices.exist(vertxOne)) {
+            addVertx(vertxOne);
+        }
+        if (!vertices.exist(vertxTwo)) {
+            addVertx(vertxTwo);
+        }
 
         addDirectedEdge(vertxOne, vertxTwo, weight);
-        if (vertxOne != vertxTwo) {
+        if (vertxOne != vertxTwo && !vertxOne.equals(vertxTwo)) {
             addDirectedEdge(vertxTwo, vertxOne, weight);
         }
     }
