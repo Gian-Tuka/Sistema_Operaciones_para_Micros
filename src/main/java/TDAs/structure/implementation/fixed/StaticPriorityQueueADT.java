@@ -4,22 +4,22 @@ import TDAs.exceptions.EmptyADTException;
 import TDAs.exceptions.FullADTException;
 import TDAs.structure.definition.PriorityQueueADT;
 
-public class StaticPriorityQueueADT implements PriorityQueueADT {
+public class StaticPriorityQueueADT<T>implements PriorityQueueADT<T> {
 
     private static final int CAPACITY = 20;
-    private int[] data;
+    private T[] data;
     private int[] priority;
     private int size;
 
     public StaticPriorityQueueADT() {
-        this.data = new int[CAPACITY];
+        this.data = (T[]) new Object[CAPACITY];
         this.priority = new int[CAPACITY];
         this.size = 0;
     }
 
 
     @Override
-    public int getElement() {
+    public T getElement() {
         validateNotEmpty();
         return this.data[0];
 
@@ -32,10 +32,10 @@ public class StaticPriorityQueueADT implements PriorityQueueADT {
     }
 
     @Override
-    public void add(int value, int priority) {
+    public void add(T value, int priority) {
         validateCapacity();
 
-        // primera posición donde la prioridad es menor a la nueva
+        // primera position donde la prioridad es menor a la nueva
         int index = 0;
         while (index < this.size && this.priority[index] >= priority) {
             index++;

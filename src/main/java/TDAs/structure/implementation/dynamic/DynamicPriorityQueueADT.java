@@ -6,14 +6,14 @@ import TDAs.structure.definition.PriorityQueueADT;
 import TDAs.structure.implementation.node.NodoPriorityQueue;
 
 // Esta clase representa la implementacion dinamica del TDA Cola con Prioridad.
-public class DynamicPriorityQueueADT implements PriorityQueueADT {
+public class DynamicPriorityQueueADT<T> implements PriorityQueueADT<T>{
 
 
-    private NodoPriorityQueue front;
+    private NodoPriorityQueue<T> front;
 
 
     @Override
-    public int getElement() {
+    public T getElement() {
         validateNotEmpty();
         return this.front.value;
     }
@@ -25,8 +25,8 @@ public class DynamicPriorityQueueADT implements PriorityQueueADT {
     }
 
     @Override
-    public void add(int value, int priority) {
-        NodoPriorityQueue newNodo = new NodoPriorityQueue(value, priority);
+    public void add(T value, int priority) {
+        NodoPriorityQueue<T> newNodo = new NodoPriorityQueue(value, priority);
 
         if (this.front == null || priority > this.front.priority) {
             newNodo.next = this.front;
@@ -34,7 +34,7 @@ public class DynamicPriorityQueueADT implements PriorityQueueADT {
             return;
         }
 
-        NodoPriorityQueue current = this.front;
+        NodoPriorityQueue<T> current = this.front;
         while (current.next != null && current.next.priority >= priority) {
             current = current.next;
         }
