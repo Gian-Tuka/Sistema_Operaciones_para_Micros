@@ -21,37 +21,31 @@ public class Main {
     }
 
     private static void inicializarDatos() {
-        // 10 Terminales
-        Terminal bue = new Terminal("BUE", "Terminal de Retiro (Buenos Aires)");
-        Terminal cor = new Terminal("COR", "Terminal de Córdoba Capital");
-        Terminal ros = new Terminal("ROS", "Terminal Mariano Moreno (Rosario)");
-        Terminal mdz = new Terminal("MDZ", "Terminal del Sol (Mendoza)");
-        Terminal sla = new Terminal("SLA", "Terminal de Salta Capital");
-        Terminal tuc = new Terminal("TUC", "Terminal de Tucumán");
-        Terminal sfe = new Terminal("SFE", "Terminal de Santa Fe");
-        Terminal nqn = new Terminal("NQN", "Terminal de Neuquén");
-        Terminal brc = new Terminal("BRC", "Terminal de Bariloche");
-        Terminal pos = new Terminal("POS", "Terminal de Posadas");
+        // Inicializar terminales hardcodeadas ya ocurre al obtener el Grafo.
+        TDAs.structure.implementation.dynamic.DinamicGraphADT<Terminal> grafo = services.MapaFisico.getGrafo();
 
-        Terminal[] terminales = {bue, cor, ros, mdz, sla, tuc, sfe, nqn, brc, pos};
-        for (Terminal t : terminales) {
-            sistema.registrarTerminal(t);
-        }
+        // Conexiones (Distancias ficticias)
+        Terminal bue = new Terminal("BUE", "");
+        Terminal cor = new Terminal("COR", "");
+        Terminal ros = new Terminal("ROS", "");
+        Terminal mdz = new Terminal("MDZ", "");
+        Terminal sla = new Terminal("SLA", "");
+        Terminal tuc = new Terminal("TUC", "");
+        Terminal sfe = new Terminal("SFE", "");
+        Terminal nqn = new Terminal("NQN", "");
+        Terminal brc = new Terminal("BRC", "");
+        Terminal pos = new Terminal("POS", "");
 
-        // Conexiones
-        sistema.registrarRuta(bue, ros);
-        sistema.registrarRuta(ros, cor);
-        sistema.registrarRuta(cor, mdz);
-        sistema.registrarRuta(bue, mdz);
-        sistema.registrarRuta(cor, sla);
-        sistema.registrarRuta(sla, tuc);
-        sistema.registrarRuta(bue, sfe);
-        sistema.registrarRuta(sfe, pos);
-        sistema.registrarRuta(bue, nqn);
-        sistema.registrarRuta(nqn, brc);
-        
-        Terminal tre = new Terminal("TRE", "Terminal de Trelew");
-        sistema.registrarTerminal(tre);
+        grafo.addEdge(bue, ros, 300);
+        grafo.addEdge(ros, cor, 400);
+        grafo.addEdge(cor, mdz, 600);
+        grafo.addEdge(bue, mdz, 1000);
+        grafo.addEdge(cor, sla, 850);
+        grafo.addEdge(sla, tuc, 310);
+        grafo.addEdge(bue, sfe, 470);
+        grafo.addEdge(sfe, pos, 700);
+        grafo.addEdge(bue, nqn, 1140);
+        grafo.addEdge(nqn, brc, 430);
 
         // 15 Micros
         String[] tipos = {"Ejecutivo", "Semi-cama", "Cama"};
@@ -63,9 +57,10 @@ public class Main {
 
         // 20 Viajes
         try {
+            String[] codigosTerm = {"BUE", "COR", "ROS", "MDZ", "SLA", "TUC", "SFE", "NQN", "BRC", "POS"};
             for (int i = 0; i < 20; i++) {
-                Terminal orig = terminales[i % 10];
-                Terminal dest = terminales[(i + 3) % 10]; 
+                Terminal orig = new Terminal(codigosTerm[i % 10], "");
+                Terminal dest = new Terminal(codigosTerm[(i + 3) % 10], ""); 
                 String patente = "AB" + (100 + (i % 15) + 1) + "CD";
                 sistema.crearViaje(orig, dest, patente, "2025-10-" + (10 + (i % 20)), (i % 5) + 1);
             }

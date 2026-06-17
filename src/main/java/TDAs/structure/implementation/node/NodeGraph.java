@@ -1,21 +1,20 @@
 package TDAs.structure.implementation.node;
 
+import TDAs.structure.definition.LinkedListADT;
+import TDAs.structure.implementation.dynamic.DynamicLinkedListADT;
+
 public class NodeGraph<T> {
 
     private T value;
-    private int weight;
     private NodeGraph<T> pointer;
-    private NodeGraph<T> adjacent;
+    private LinkedListADT<Edge<T>> outgoingEdges;
+    private LinkedListADT<Edge<T>> incomingEdges;
 
     public NodeGraph(T value) {
-        this(value, 0);
-    }
-
-    public NodeGraph(T value, int weight) {
         this.value = value;
-        this.weight = weight;
         this.pointer = null;
-        this.adjacent = null;
+        this.outgoingEdges = new DynamicLinkedListADT<>();
+        this.incomingEdges = new DynamicLinkedListADT<>();
     }
 
     public T getValue() {
@@ -26,14 +25,6 @@ public class NodeGraph<T> {
         this.value = value;
     }
 
-    public int getWeight() {
-        return weight;
-    }
-
-    public void setWeight(int weight) {
-        this.weight = weight;
-    }
-
     public NodeGraph<T> getPointer() {
         return pointer;
     }
@@ -42,11 +33,11 @@ public class NodeGraph<T> {
         this.pointer = pointer;
     }
 
-    public NodeGraph<T> getAdjacent() {
-        return adjacent;
+    public LinkedListADT<Edge<T>> getOutgoingEdges() {
+        return outgoingEdges;
     }
 
-    public void setAdjacent(NodeGraph<T> adjacent) {
-        this.adjacent = adjacent;
+    public LinkedListADT<Edge<T>> getIncomingEdges() {
+        return incomingEdges;
     }
 }

@@ -2,10 +2,12 @@ package TDAs.structure.implementation.dynamic;
 
 
 import TDAs.structure.definition.GraphADT;
+import TDAs.structure.definition.LinkedListADT;
 import TDAs.structure.definition.SetADT;
+import TDAs.structure.implementation.node.Edge;
 import TDAs.structure.implementation.node.NodeGraph;
 
-public class DinamicGraphADT<T> implements GraphADT<T>{
+public class DinamicGraphADT<T> implements GraphADT<T> {
 
     private final SetADT<T> vertices;
     private NodeGraph<T> head;
@@ -57,13 +59,13 @@ public class DinamicGraphADT<T> implements GraphADT<T>{
             return;
         }
 
-        if (head.getValue() == vertex) {
+        if (head.getValue().equals(vertex)) {
             head = head.getPointer();
             return;
         }
 
         NodeGraph<T> pointer = head;
-        while (pointer.getPointer() != null && pointer.getPointer().getValue() != vertex) {
+        while (pointer.getPointer() != null && !pointer.getPointer().getValue().equals(vertex)) {
             pointer = pointer.getPointer();
         }
 
@@ -81,10 +83,20 @@ public class DinamicGraphADT<T> implements GraphADT<T>{
             addVertx(vertxTwo);
         }
 
-        addDirectedEdge(vertxOne, vertxTwo, weight);
-        if (vertxOne != vertxTwo && !vertxOne.equals(vertxTwo)) {
-            addDirectedEdge(vertxTwo, vertxOne, weight);
+        NodeGraph<T> fromNode = findVertexNode(vertxOne);
+        NodeGraph<T> toNode = findVertexNode(vertxTwo);
+
+        // Check for duplicates
+        LinkedListADT<Edge<T>> outgoing = fromNode.getOutgoingEdges();
+        for (int i = 0; i < outgoing.size(); i++) {
+            if (outgoing.get(i).getDestination().equals(vertxTwo)) {
+                throw new TDAs.exceptions.GenericADTException("Ya existe una ruta desde el origen al destino indicado.");
+            }
         }
+
+        Edge<T> newEdge = new Edge<>(vertxOne, vertxTwo, weight);
+        fromNode.getOutgoingEdges().add(newEdge);
+        toNode.getIncomingEdges().add(newEdge);
     }
 
     @Override
@@ -93,9 +105,25 @@ public class DinamicGraphADT<T> implements GraphADT<T>{
             throw new TDAs.exceptions.ElementNotFoundADTException("Uno o ambos vertices no existen");
         }
 
-        removeDirectedEdge(vertxOne, vertxTwo);
-        if (vertxOne != vertxTwo) {
-            removeDirectedEdge(vertxTwo, vertxOne);
+        NodeGraph<T> fromNode = findVertexNode(vertxOne);
+        NodeGraph<T> toNode = findVertexNode(vertxTwo);
+
+        // Remove from outgoing
+        LinkedListADT<Edge<T>> outgoing = fromNode.getOutgoingEdges();
+        for (int i = 0; i < outgoing.size(); i++) {
+            if (outgoing.get(i).getDestination().equals(vertxTwo)) {
+                outgoing.remove(i);
+                break;
+            }
+        }
+
+        // Remove from incoming
+        LinkedListADT<Edge<T>> incoming = toNode.getIncomingEdges();
+        for (int i = 0; i < incoming.size(); i++) {
+            if (incoming.get(i).getOrigin().equals(vertxOne)) {
+                incoming.remove(i);
+                break;
+            }
         }
     }
 
@@ -104,14 +132,13 @@ public class DinamicGraphADT<T> implements GraphADT<T>{
         if (!vertices.exist(vertxOne) || !vertices.exist(vertxTwo)) {
             throw new TDAs.exceptions.ElementNotFoundADTException("Uno o ambos vertices no existen");
         }
-        NodeGraph<T> vertexNode = findVertexNode(vertxOne);
 
-        NodeGraph<T> adjacency = vertexNode.getAdjacent();
-        while (adjacency != null) {
-            if (adjacency.getValue() == vertxTwo) {
+        NodeGraph<T> fromNode = findVertexNode(vertxOne);
+        LinkedListADT<Edge<T>> outgoing = fromNode.getOutgoingEdges();
+        for (int i = 0; i < outgoing.size(); i++) {
+            if (outgoing.get(i).getDestination().equals(vertxTwo)) {
                 return true;
             }
-            adjacency = adjacency.getPointer();
         }
         return false;
     }
@@ -121,14 +148,13 @@ public class DinamicGraphADT<T> implements GraphADT<T>{
         if (!vertices.exist(vertxOne) || !vertices.exist(vertxTwo)) {
             throw new TDAs.exceptions.ElementNotFoundADTException("Uno o ambos vertices no existen");
         }
-        NodeGraph<T> vertexNode = findVertexNode(vertxOne);
 
-        NodeGraph<T> adjacency = vertexNode.getAdjacent();
-        while (adjacency != null) {
-            if (adjacency.getValue() == vertxTwo) {
-                return adjacency.getWeight();
+        NodeGraph<T> fromNode = findVertexNode(vertxOne);
+        LinkedListADT<Edge<T>> outgoing = fromNode.getOutgoingEdges();
+        for (int i = 0; i < outgoing.size(); i++) {
+            if (outgoing.get(i).getDestination().equals(vertxTwo)) {
+                return outgoing.get(i).getWeight();
             }
-            adjacency = adjacency.getPointer();
         }
         return -1;
     }
@@ -138,10 +164,10 @@ public class DinamicGraphADT<T> implements GraphADT<T>{
         return vertices.isEmpty();
     }
 
-    private NodeGraph<T> findVertexNode(T vertex) {
+    public NodeGraph<T> findVertexNode(T vertex) {
         NodeGraph<T> pointer = head;
         while (pointer != null) {
-            if (pointer.getValue() == vertex) {
+            if (pointer.getValue().equals(vertex)) {
                 return pointer;
             }
             pointer = pointer.getPointer();
@@ -149,64 +175,40 @@ public class DinamicGraphADT<T> implements GraphADT<T>{
         return null;
     }
 
-    private void addDirectedEdge(T from, T to, int weight) {
-        NodeGraph<T> fromNode = findVertexNode(from);
-        if (fromNode == null) {
-            return;
-        }
-
-        NodeGraph<T> adjacency = fromNode.getAdjacent();
-        if (adjacency == null) {
-            fromNode.setAdjacent(new NodeGraph<T>(to, weight));
-            return;
-        }
-
-        NodeGraph<T> pointer = adjacency;
-        NodeGraph<T> previous = null;
-        while (pointer != null) {
-            if (pointer.getValue() == to) {
-                pointer.setWeight(weight);
-                return;
-            }
-            previous = pointer;
-            pointer = pointer.getPointer();
-        }
-
-        previous.setPointer(new NodeGraph<T>(to, weight));
-    }
-
-    private void removeDirectedEdge(T from, T to) {
-        NodeGraph<T> fromNode = findVertexNode(from);
-        if (fromNode == null) {
-            return;
-        }
-
-        NodeGraph<T> adjacency = fromNode.getAdjacent();
-        if (adjacency == null) {
-            return;
-        }
-
-        if (adjacency.getValue() == to) {
-            fromNode.setAdjacent(adjacency.getPointer());
-            return;
-        }
-
-        NodeGraph<T> pointer = adjacency;
-        while (pointer.getPointer() != null && pointer.getPointer().getValue() != to) {
-            pointer = pointer.getPointer();
-        }
-
-        if (pointer.getPointer() != null) {
-            pointer.setPointer(pointer.getPointer().getPointer());
-        }
-    }
-
     private void removeEdgeFromAll(T vertex) {
-        NodeGraph<T> pointer = head;
-        while (pointer != null) {
-            removeDirectedEdge(pointer.getValue(), vertex);
-            pointer = pointer.getPointer();
+        NodeGraph<T> targetNode = findVertexNode(vertex);
+        if (targetNode == null) return;
+
+        // Remove all incoming edges to this vertex from their respective origins
+        LinkedListADT<Edge<T>> incoming = targetNode.getIncomingEdges();
+        for (int i = 0; i < incoming.size(); i++) {
+            Edge<T> edge = incoming.get(i);
+            NodeGraph<T> originNode = findVertexNode(edge.getOrigin());
+            if (originNode != null) {
+                LinkedListADT<Edge<T>> out = originNode.getOutgoingEdges();
+                for (int j = 0; j < out.size(); j++) {
+                    if (out.get(j).getDestination().equals(vertex)) {
+                        out.remove(j);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Remove all outgoing edges from this vertex from their respective destinations
+        LinkedListADT<Edge<T>> outgoing = targetNode.getOutgoingEdges();
+        for (int i = 0; i < outgoing.size(); i++) {
+            Edge<T> edge = outgoing.get(i);
+            NodeGraph<T> destNode = findVertexNode(edge.getDestination());
+            if (destNode != null) {
+                LinkedListADT<Edge<T>> in = destNode.getIncomingEdges();
+                for (int j = 0; j < in.size(); j++) {
+                    if (in.get(j).getOrigin().equals(vertex)) {
+                        in.remove(j);
+                        break;
+                    }
+                }
+            }
         }
     }
-
 }

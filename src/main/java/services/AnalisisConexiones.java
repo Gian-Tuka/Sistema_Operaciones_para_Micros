@@ -5,6 +5,8 @@ import TDAs.structure.definition.GraphADT;
 import TDAs.structure.definition.LinkedListADT;
 import TDAs.structure.definition.SetADT;
 import TDAs.structure.implementation.dynamic.DinamicSetADT;
+import TDAs.structure.implementation.dynamic.DinamicGraphADT;
+import TDAs.structure.implementation.node.NodeGraph;
 import models.Terminal;
 import models.Viaje;
 
@@ -34,7 +36,6 @@ public class AnalisisConexiones {
             }
         }
 
-        // Restaurar
         while (!temp.isEmpty()) {
             try {
                 Terminal t = temp.choose();
@@ -78,7 +79,6 @@ public class AnalisisConexiones {
             }
         }
 
-        // Restaurar
         while (!temp.isEmpty()) {
             try {
                 Terminal t = temp.choose();
@@ -97,7 +97,7 @@ public class AnalisisConexiones {
     }
 
     public void reporteTerminalMasConexionesDirectas() {
-        GraphADT<Terminal> grafo = planificacionRutas.getConexiones();
+        DinamicGraphADT<Terminal> grafo = (DinamicGraphADT<Terminal>) planificacionRutas.getConexiones();
         SetADT<Terminal> terminales = grafo.getVertxs();
         SetADT<Terminal> temp = new DinamicSetADT<>();
 
@@ -110,27 +110,8 @@ public class AnalisisConexiones {
                 terminales.remove(t);
                 temp.add(t);
 
-                int conexionesDirectas = 0;
-                
-                // Contar conexiones
-                SetADT<Terminal> otras = grafo.getVertxs();
-                SetADT<Terminal> otrasTemp = new DinamicSetADT<>();
-                while (!otras.isEmpty()) {
-                    Terminal o = otras.choose();
-                    otras.remove(o);
-                    otrasTemp.add(o);
-                    
-                    if (!t.equals(o)) {
-                        if (grafo.existsEdge(t, o)) {
-                            conexionesDirectas++;
-                        }
-                    }
-                }
-                while (!otrasTemp.isEmpty()) {
-                    Terminal o = otrasTemp.choose();
-                    otrasTemp.remove(o);
-                    otras.add(o);
-                }
+                NodeGraph<Terminal> vNode = grafo.findVertexNode(t);
+                int conexionesDirectas = vNode != null ? vNode.getOutgoingEdges().size() : 0;
 
                 if (conexionesDirectas > maxConexiones) {
                     maxConexiones = conexionesDirectas;
@@ -142,7 +123,6 @@ public class AnalisisConexiones {
             }
         }
 
-        // Restaurar
         while (!temp.isEmpty()) {
             try {
                 Terminal t = temp.choose();
