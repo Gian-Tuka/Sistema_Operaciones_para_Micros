@@ -107,12 +107,10 @@ public class Main {
 
         do {
             System.out.println("\n===== SISTEMA DE GESTIÓN DE TRANSPORTE =====");
-            System.out.println("1. Agregar un Viaje");
-            System.out.println("2. Reprogramar Viaje");
-            System.out.println("3. Reportes de Análisis de Conexiones");
-            System.out.println("4. Reportes de Flota / Simulaciones");
-            System.out.println("5. Planificación: Rutas Posibles entre Terminales");
-            System.out.println("6. Mostrar Viajes Pendientes (por Prioridad)");
+            System.out.println("1. Viajes");
+            System.out.println("2. Micros");
+            System.out.println("3. Terminales");
+            System.out.println("4. Rutas");
             System.out.println("0. Salir");
             
             opcion = leerEntero(scanner, "Seleccione una opción: ");
@@ -120,22 +118,16 @@ public class Main {
             try {
                 switch (opcion) {
                     case 1:
-                        menuAgregarViaje(scanner);
+                        menuViajes(scanner);
                         break;
                     case 2:
-                        menuReprogramarViaje(scanner);
+                        menuMicros(scanner);
                         break;
                     case 3:
-                        menuAnalisisConexiones();
+                        menuTerminales(scanner);
                         break;
                     case 4:
-                        menuReportesFlota();
-                        break;
-                    case 5:
-                        menuRutasPosibles(scanner);
-                        break;
-                    case 6:
-                        mostrarViajesPendientes();
+                        menuRutas(scanner);
                         break;
                     case 0:
                         System.out.println("Saliendo del sistema...");
@@ -151,6 +143,140 @@ public class Main {
         } while (opcion != 0);
 
         scanner.close();
+    }
+
+    private static void menuViajes(Scanner scanner) {
+        int opcion = -1;
+        do {
+            System.out.println("\n--- MENÚ VIAJES ---");
+            System.out.println("1. Ver viajes");
+            System.out.println("2. Agregar viaje");
+            System.out.println("3. Reprogramar viaje");
+            System.out.println("4. Re-priorizar viaje");
+            System.out.println("0. Volver");
+            opcion = leerEntero(scanner, "Seleccione una opción: ");
+
+            switch (opcion) {
+                case 1: mostrarViajesPendientes(); break;
+                case 2: menuAgregarViaje(scanner); break;
+                case 3: menuReprogramarViaje(scanner); break;
+                case 4: System.out.println("Funcionalidad a implementar..."); break;
+                case 0: break;
+                default: System.out.println("Opción inválida.");
+            }
+        } while (opcion != 0);
+    }
+
+    private static void menuMicros(Scanner scanner) {
+        int opcion = -1;
+        do {
+            System.out.println("\n--- MENÚ MICROS ---");
+            System.out.println("1. Ver micros");
+            System.out.println("2. Agregar micro");
+            System.out.println("3. Editar micro");
+            System.out.println("4. Eliminar micro");
+            System.out.println("5. Reporte | Promedio Utilización micros");
+            System.out.println("6. Reporte | Asignaciones Micros");
+            System.out.println("0. Volver");
+            opcion = leerEntero(scanner, "Seleccione una opción: ");
+
+            switch (opcion) {
+                case 1: 
+                case 2: 
+                case 3: 
+                case 4: 
+                    System.out.println("Funcionalidad a implementar..."); 
+                    break;
+                case 5: 
+                    sistema.mostrarUtilizacionPromedio(); 
+                    break;
+                case 6: 
+                    Micro masAsig = sistema.getGestionFlota().obtenerMicroMasAsignado();
+                    if (masAsig != null) {
+                        int asig = sistema.getGestionFlota().getCantidadAsignaciones(masAsig.getPatente());
+                        System.out.println("El micro más asignado es: " + masAsig.getPatente() + " con " + asig + " asignaciones.");
+                    } else {
+                        System.out.println("No hay micros con asignaciones.");
+                    }
+                    break;
+                case 0: break;
+                default: System.out.println("Opción inválida.");
+            }
+        } while (opcion != 0);
+    }
+
+    private static void menuTerminales(Scanner scanner) {
+        int opcion = -1;
+        do {
+            System.out.println("\n--- MENÚ TERMINALES ---");
+            System.out.println("1. Ver terminales");
+            System.out.println("2. Agregar terminales");
+            System.out.println("3. Eliminar terminales");
+            System.out.println("4. Reporte | Conexiones directas");
+            System.out.println("5. Reporte | Conexiones generales");
+            System.out.println("0. Volver");
+            opcion = leerEntero(scanner, "Seleccione una opción: ");
+
+            switch (opcion) {
+                case 1: 
+                case 2: 
+                case 3: 
+                    System.out.println("Funcionalidad a implementar..."); 
+                    break;
+                case 4: 
+                    sistema.getAnalisisConexiones().listarTerminalesOperadas();
+                    System.out.println();
+                    sistema.getAnalisisConexiones().reporteTerminalMasConexionesDirectas();
+                    break;
+                case 5: 
+                    sistema.getAnalisisConexiones().reporteTerminalMayorTrafico();
+                    System.out.println("\nTerminales desconectadas:");
+                    SetADT<Terminal> desc = sistema.getPlanificacionRutas().identificarTerminalesDesconectadas();
+                    SetADT<Terminal> temp = new TDAs.structure.implementation.dynamic.DinamicSetADT<>();
+                    boolean hayDesc = false;
+                    while (!desc.isEmpty()) {
+                        try {
+                            Terminal t = desc.choose();
+                            desc.remove(t);
+                            temp.add(t);
+                            System.out.println("- " + t);
+                            hayDesc = true;
+                        } catch (EmptyADTException e) {
+                            break;
+                        }
+                    }
+                    if (!hayDesc) System.out.println("(Ninguna)");
+                    break;
+                case 0: break;
+                default: System.out.println("Opción inválida.");
+            }
+        } while (opcion != 0);
+    }
+
+    private static void menuRutas(Scanner scanner) {
+        int opcion = -1;
+        do {
+            System.out.println("\n--- MENÚ RUTAS ---");
+            System.out.println("1. Ver Ruta");
+            System.out.println("2. Crear Ruta");
+            System.out.println("3. Eliminar Ruta");
+            System.out.println("4. Reporte | Utilizacion de rutas");
+            System.out.println("5. Reporte | Rutas no utilizadas");
+            System.out.println("0. Volver");
+            opcion = leerEntero(scanner, "Seleccione una opción: ");
+
+            switch (opcion) {
+                case 1: menuRutasPosibles(scanner); break;
+                case 2: 
+                case 3: 
+                case 4: 
+                case 5: 
+                    System.out.println("Funcionalidad a implementar..."); 
+                    break;
+                case 0: break;
+                default: System.out.println("Opción inválida.");
+            }
+        } while (opcion != 0);
     }
 
     private static void menuAgregarViaje(Scanner scanner) {
@@ -210,42 +336,7 @@ public class Main {
         }
     }
 
-    private static void menuAnalisisConexiones() {
-        System.out.println("\n-- Análisis de Conexiones --");
-        sistema.getAnalisisConexiones().listarTerminalesOperadas();
-        System.out.println();
-        sistema.getAnalisisConexiones().reporteTerminalMayorTrafico();
-        sistema.getAnalisisConexiones().reporteTerminalMasConexionesDirectas();
-        
-        System.out.println("\nTerminales desconectadas:");
-        SetADT<Terminal> desc = sistema.getPlanificacionRutas().identificarTerminalesDesconectadas();
-        SetADT<Terminal> temp = new TDAs.structure.implementation.dynamic.DinamicSetADT<>();
-        boolean hayDesc = false;
-        while (!desc.isEmpty()) {
-            try {
-                Terminal t = desc.choose();
-                desc.remove(t);
-                temp.add(t);
-                System.out.println("- " + t);
-                hayDesc = true;
-            } catch (EmptyADTException e) {
-                break;
-            }
-        }
-        if (!hayDesc) System.out.println("(Ninguna)");
-    }
 
-    private static void menuReportesFlota() {
-        System.out.println("\n-- Reportes de Flota --");
-        sistema.mostrarUtilizacionPromedio();
-        Micro masAsig = sistema.getGestionFlota().obtenerMicroMasAsignado();
-        if (masAsig != null) {
-            int asig = sistema.getGestionFlota().getCantidadAsignaciones(masAsig.getPatente());
-            System.out.println("El micro más asignado es: " + masAsig.getPatente() + " con " + asig + " asignaciones.");
-        } else {
-            System.out.println("No hay micros con asignaciones.");
-        }
-    }
 
     private static void menuRutasPosibles(Scanner scanner) {
         System.out.println("\n-- Rutas Posibles --");
