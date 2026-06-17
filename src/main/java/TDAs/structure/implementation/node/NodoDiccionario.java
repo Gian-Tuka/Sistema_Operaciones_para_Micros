@@ -1,11 +1,11 @@
 package TDAs.structure.implementation.node;
 
-public class NodoDiccionario<T> {
-    public T key;
-    public T value;
-    public NodoDiccionario<T> next;
+public class NodoDiccionario<K, V> {
+    public K key;
+    public V value;
+    public NodoDiccionario<K, V> next;
 
-    public NodoDiccionario(T key, T value) {
+    public NodoDiccionario(K key, V value) {
         this.key = key;
         this.value = value;
         this.next = null;

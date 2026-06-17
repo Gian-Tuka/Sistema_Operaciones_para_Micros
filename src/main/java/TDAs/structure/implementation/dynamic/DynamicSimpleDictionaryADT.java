@@ -1,18 +1,19 @@
 package TDAs.structure.implementation.dynamic;
 
-import TDAs.structure.definition.LinkedListADT;
 import TDAs.structure.definition.SetADT;
 import TDAs.structure.definition.SimpleDictionaryADT;
 import TDAs.structure.implementation.node.NodoDiccionario;
 
+public class DynamicSimpleDictionaryADT<K, V> implements SimpleDictionaryADT<K, V> {
 
-public class DynamicSimpleDictionaryADT<T> implements SimpleDictionaryADT<T> {
-
-    private NodoDiccionario<T> head;
+    private NodoDiccionario<K, V> head;
 
     @Override
-    public void add(T key, T value) {
-        NodoDiccionario<T> actual = this.head;
+    public void add(K key, V value) {
+        if (key == null) {
+            throw new TDAs.exceptions.GenericADTException("La clave no puede ser nula");
+        }
+        NodoDiccionario<K, V> actual = this.head;
 
         while (actual != null) {
             if (actual.key.equals(key)) {
@@ -22,16 +23,15 @@ public class DynamicSimpleDictionaryADT<T> implements SimpleDictionaryADT<T> {
             actual = actual.next;
         }
 
-        NodoDiccionario<T> nuevoNodo = new NodoDiccionario<>(key, value);
+        NodoDiccionario<K, V> nuevoNodo = new NodoDiccionario<>(key, value);
         nuevoNodo.next = this.head;
         this.head = nuevoNodo;
-
     }
 
     @Override
-    public void remove(T key) {
+    public void remove(K key) {
         if (isEmpty()){
-            return;
+            throw new TDAs.exceptions.EmptyADTException("El diccionario está vacio");
         }
 
         if (this.head.key.equals(key)) {
@@ -39,7 +39,7 @@ public class DynamicSimpleDictionaryADT<T> implements SimpleDictionaryADT<T> {
             return;
         }
 
-        NodoDiccionario<T> actual = this.head;
+        NodoDiccionario<K, V> actual = this.head;
         while (actual.next != null) {
             if (actual.next.key.equals(key)) {
                 actual.next = actual.next.next;
@@ -47,7 +47,7 @@ public class DynamicSimpleDictionaryADT<T> implements SimpleDictionaryADT<T> {
             }
             actual = actual.next;
         }
-
+        throw new TDAs.exceptions.ElementNotFoundADTException("La clave no existe en el diccionario");
     }
 
     /**
@@ -55,8 +55,11 @@ public class DynamicSimpleDictionaryADT<T> implements SimpleDictionaryADT<T> {
      * Precondición: La estructura debe tener elementos y la clave debe existir.
      */
     @Override
-    public T get(T key) {
-        NodoDiccionario<T> actual = this.head;
+    public V get(K key) {
+        if (isEmpty()){
+            throw new TDAs.exceptions.EmptyADTException("El diccionario está vacio");
+        }
+        NodoDiccionario<K, V> actual = this.head;
 
         while (actual != null) {
             if (actual.key.equals(key)) {
@@ -64,15 +67,15 @@ public class DynamicSimpleDictionaryADT<T> implements SimpleDictionaryADT<T> {
             }
             actual = actual.next;
         }
-        return null;
+        throw new TDAs.exceptions.ElementNotFoundADTException("La clave no existe en el diccionario");
     }
 
     @Override
-    public SetADT getKeys() {
-        SetADT setKeys = new DynamicSetADT();
-        NodoDiccionario<T> actual = this.head;
+    public SetADT<K> getKeys() {
+        SetADT<K> setKeys = new DinamicSetADT<>();
+        NodoDiccionario<K, V> actual = this.head;
 
-        while( actual != null) {
+        while(actual != null) {
             setKeys.add(actual.key);
             actual = actual.next;
         }
@@ -83,5 +86,4 @@ public class DynamicSimpleDictionaryADT<T> implements SimpleDictionaryADT<T> {
     public boolean isEmpty() {
         return this.head == null;
     }
-
 }

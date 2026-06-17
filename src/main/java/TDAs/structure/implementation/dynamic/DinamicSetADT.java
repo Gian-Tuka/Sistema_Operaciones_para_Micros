@@ -41,7 +41,7 @@ public class DinamicSetADT<T> implements SetADT<T> {
             head = new Nodo(value);
             size++;
         } else if (exist(value)) {
-            System.out.println("El valor '" + value + "' ya existe");
+            throw new TDAs.exceptions.GenericADTException("El valor '" + value + "' ya existe");
         } else {
             pointer = head;
             while (pointer.getNext() != null) {
@@ -55,9 +55,9 @@ public class DinamicSetADT<T> implements SetADT<T> {
     @Override
     public void remove(T value) {
         if (isEmpty()) {
-            System.out.println("El conjunto esta vacio");
+            throw new EmptyADTException("El conjunto esta vacio");
         } else if (!exist(value)) {
-            System.out.println("El valor '" + value + "' no existe");
+            throw new TDAs.exceptions.ElementNotFoundADTException("El valor '" + value + "' no existe");
         } else {
             pointer = head;
             if (pointer.getValue() == value) {

@@ -22,8 +22,11 @@ public class DinamicGraphADT<T> implements GraphADT<T>{
 
     @Override
     public void addVertx(T vertex) {
+        if (vertex == null) {
+            throw new TDAs.exceptions.GenericADTException("El vertice no puede ser nulo");
+        }
         if (vertices.exist(vertex)) {
-            return;
+            throw new TDAs.exceptions.GenericADTException("El vertice ya existe");
         }
 
         vertices.add(vertex);
@@ -44,7 +47,7 @@ public class DinamicGraphADT<T> implements GraphADT<T>{
     @Override
     public void removeVertx(T vertex) {
         if (!vertices.exist(vertex)) {
-            return;
+            throw new TDAs.exceptions.ElementNotFoundADTException("El vertice no existe");
         }
 
         removeEdgeFromAll(vertex);
@@ -83,7 +86,7 @@ public class DinamicGraphADT<T> implements GraphADT<T>{
     @Override
     public void removeEdge(T vertxOne, T vertxTwo) {
         if (!vertices.exist(vertxOne) || !vertices.exist(vertxTwo)) {
-            return;
+            throw new TDAs.exceptions.ElementNotFoundADTException("Uno o ambos vertices no existen");
         }
 
         removeDirectedEdge(vertxOne, vertxTwo);
@@ -94,10 +97,10 @@ public class DinamicGraphADT<T> implements GraphADT<T>{
 
     @Override
     public boolean existsEdge(T vertxOne, T vertxTwo) {
-        NodeGraph<T> vertexNode = findVertexNode(vertxOne);
-        if (vertexNode == null) {
-            return false;
+        if (!vertices.exist(vertxOne) || !vertices.exist(vertxTwo)) {
+            throw new TDAs.exceptions.ElementNotFoundADTException("Uno o ambos vertices no existen");
         }
+        NodeGraph<T> vertexNode = findVertexNode(vertxOne);
 
         NodeGraph<T> adjacency = vertexNode.getAdjacent();
         while (adjacency != null) {
@@ -111,10 +114,10 @@ public class DinamicGraphADT<T> implements GraphADT<T>{
 
     @Override
     public int edgeWeight(T vertxOne, T vertxTwo) {
-        NodeGraph<T> vertexNode = findVertexNode(vertxOne);
-        if (vertexNode == null) {
-            return -1;
+        if (!vertices.exist(vertxOne) || !vertices.exist(vertxTwo)) {
+            throw new TDAs.exceptions.ElementNotFoundADTException("Uno o ambos vertices no existen");
         }
+        NodeGraph<T> vertexNode = findVertexNode(vertxOne);
 
         NodeGraph<T> adjacency = vertexNode.getAdjacent();
         while (adjacency != null) {
