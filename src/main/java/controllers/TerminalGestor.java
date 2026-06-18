@@ -6,6 +6,8 @@ import TDAs.structure.definition.SimpleDictionaryADT;
 import TDAs.structure.implementation.dynamic.DynamicLinkedListADT;
 import TDAs.structure.implementation.dynamic.DynamicSimpleDictionaryADT;
 import models.Terminal;
+import exception.DuplicateTerminalException;
+import exception.TerminalNotFoundException;
 
 public class TerminalGestor {
 
@@ -16,6 +18,9 @@ public class TerminalGestor {
     }
 
     public void agregarTerminal(Terminal terminal) {
+        if (terminales.get(terminal.getCodigo()) != null) {
+            throw new DuplicateTerminalException("Terminal con codigo " + terminal.getCodigo() + " ya existe");
+        }
         terminales.add(terminal.getCodigo(), terminal);
         GrafoRutas.getInstance().agregarTerminal(terminal);
     }
@@ -26,7 +31,7 @@ public class TerminalGestor {
             terminales.remove(codigo);
             GrafoRutas.getInstance().eliminarTerminal(t);
         } else {
-            throw new RuntimeException("Terminal no encontrada");
+            throw new TerminalNotFoundException("Terminal con codigo " + codigo + " no encontrada");
         }
     }
 

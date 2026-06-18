@@ -6,6 +6,8 @@ import TDAs.structure.implementation.dynamic.DynamicLinkedListADT;
 import TDAs.structure.implementation.dynamic.DynamicPriorityQueueADT;
 import models.Micro;
 import models.Viaje;
+import exception.ViajeNoEncontradoException;
+import exception.ViajeDuplicadoException;
 
 public class ViajeGestor {
 
@@ -65,7 +67,7 @@ public class ViajeGestor {
             }
             reconstruirCola();
         } else {
-            throw new RuntimeException("Viaje no encontrado");
+            throw new ViajeNoEncontradoException("Viaje con ID " + idViaje + " no encontrado");
         }
     }
 
@@ -82,7 +84,7 @@ public class ViajeGestor {
             viajeTarget.setPrioridad(nuevaPrioridad);
             reconstruirCola();
         } else {
-            throw new RuntimeException("Viaje no encontrado");
+            throw new ViajeNoEncontradoException("Viaje con ID " + idViaje + " no encontrado");
         }
     }
     public String generarID() {

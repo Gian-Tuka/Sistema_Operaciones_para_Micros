@@ -6,6 +6,8 @@ import TDAs.structure.definition.SimpleDictionaryADT;
 import TDAs.structure.implementation.dynamic.DynamicLinkedListADT;
 import TDAs.structure.implementation.dynamic.DynamicSimpleDictionaryADT;
 import models.Micro;
+import exception.DuplicateMicroException;
+import exception.MicroNotFoundException;
 
 public class MicroGestor {
 
@@ -16,13 +18,17 @@ public class MicroGestor {
     }
 
     public void agregarMicro(Micro micro) {
+        if (existeMicro(micro.getIdPatente())) {
+            throw new DuplicateMicroException("Micro con patente " + micro.getIdPatente() + " ya existe");
+        }
         micros.add(micro.getIdPatente(), micro);
     }
 
     public void eliminarMicro(String idPatente) {
-        if (!micros.isEmpty()) {
-            micros.remove(idPatente);
+        if (!existeMicro(idPatente)) {
+            throw new MicroNotFoundException("Micro con patente " + idPatente + " no encontrado");
         }
+        micros.remove(idPatente);
     }
 
     public boolean existeMicro(String patente) {

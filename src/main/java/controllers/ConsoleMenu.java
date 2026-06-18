@@ -5,6 +5,7 @@ import models.Micro;
 import models.Terminal;
 import models.TipoMicro;
 import models.Viaje;
+import exception.*;
 
 import java.util.Scanner;
 
@@ -77,101 +78,157 @@ public class ConsoleMenu {
                     imprimirLista(viajeGestor.listarViajes());
                     break;
                 case "2":
-                    // Validar terminal origen
-                    Terminal origen = null;
-                    while (origen == null) {
-                        System.out.print("Codigo Origen: ");
-                        String codOrigen = scanner.nextLine().trim();
-                        if (terminalGestor.existeTerminal(codOrigen)) {
-                            origen = terminalGestor.obtenerTerminal(codOrigen);
-                        } else {
-                            System.out.println("Error: Terminal origen no existe.");
+                    try {
+                        // Origen
+                        Terminal origen = null;
+                        while (origen == null) {
+                            System.out.print("Codigo Origen: ");
+                            String codOrigen = scanner.nextLine().trim();
+                            if (codOrigen.isEmpty()) {
+                                System.out.println("Error: Codigo de origen no puede estar vacío.");
+                                continue;
+                            }
+                            if (terminalGestor.existeTerminal(codOrigen)) {
+                                origen = terminalGestor.obtenerTerminal(codOrigen);
+                            } else {
+                                System.out.println("Error: Terminal origen no existe.");
+                            }
                         }
-                    }
 
-                    // Validar terminal destino
-                    Terminal destino = null;
-                    while (destino == null) {
-                        System.out.print("Codigo Destino: ");
-                        String codDestino = scanner.nextLine().trim();
-                        if (terminalGestor.existeTerminal(codDestino)) {
-                            destino = terminalGestor.obtenerTerminal(codDestino);
-                        } else {
-                            System.out.println("Error: Terminal destino no existe.");
+                        // Destino
+                        Terminal destino = null;
+                        while (destino == null) {
+                            System.out.print("Codigo Destino: ");
+                            String codDestino = scanner.nextLine().trim();
+                            if (codDestino.isEmpty()) {
+                                System.out.println("Error: Codigo de destino no puede estar vacío.");
+                                continue;
+                            }
+                            if (terminalGestor.existeTerminal(codDestino)) {
+                                destino = terminalGestor.obtenerTerminal(codDestino);
+                            } else {
+                                System.out.println("Error: Terminal destino no existe.");
+                            }
                         }
-                    }
 
-                    // Validar micro (opcional)
-                    Micro m = null;
-                    System.out.print("Patente Micro Asignado (opcional, enter para saltar): ");
-                    String pat = scanner.nextLine().trim();
-                    if (!pat.isEmpty()) {
-                        if (microGestor.existeMicro(pat)) {
-                            m = microGestor.obtenerMicro(pat);
-                        } else {
-                            System.out.println("Error: Micro con patente " + pat + " no existe.");
+                        // Patente micro (opcional). Si se ingresa una patente nueva, ofrecer crear el micro.
+                        Micro m = null;
+                        System.out.print("Patente Micro Asignado (opcional, enter para saltar): ");
+                        String pat = scanner.nextLine().trim().toUpperCase();
+                        if (!pat.isEmpty()) {
+                            if (microGestor.existeMicro(pat)) {
+                                m = microGestor.obtenerMicro(pat);
+                            } else {
+                                System.out.println("Micro con patente " + pat + " no existe.");
+                                System.out.print("Desea crearlo? (s/n): ");
+                                String r = scanner.nextLine().trim().toLowerCase();
+                                if (r.equals("s") || r.equals("y")) {
+                                    if (!validarFormatoPatente(pat)) {
+                                        System.out.println("Patente con formato inválido. Use AA-NNN-AA (ej: AB-123-CD). Se le pedirá una nueva patente.");
+                                        pat = solicitarPatenteMicro("Patente del micro (formato AA-NNN-AA): ");
+                                    }
+                                    TipoMicro tipo = solicitarTipoMicro();
+                                    microGestor.agregarMicro(new Micro(pat, tipo));
+                                    m = microGestor.obtenerMicro(pat);
+                                    System.out.println("Micro creado y asignado: " + pat);
+                                } else {
+                                    System.out.println("No se asignará micro.");
+                                }
+                            }
+                        }
+
+                        // Fecha
+                        System.out.print("Fecha: ");
+                        String fecha = scanner.nextLine().trim();
+                        if (fecha.isEmpty()) {
+                            throw new InvalidInputException("La fecha no puede estar vacía");
+                        }
+
+                        // Prioridad
+                        int prio = 0;
+                        while (true) {
+                            System.out.print("Prioridad (entero): ");
+                            String prioStr = scanner.nextLine().trim();
+                            if (!viajeGestor.validarPrioridad(prioStr)) {
+                                System.out.println("Error: La prioridad debe ser un número entero válido y no puede estar vacía.");
+                                continue;
+                            }
+                            prio = Integer.parseInt(prioStr);
                             break;
                         }
-                    }
 
-                    // Validar fecha (no vacía)
-                    System.out.print("Fecha: ");
-                    String fecha = scanner.nextLine().trim();
-                    if (fecha.isEmpty()) {
-                        System.out.println("Error: La fecha no puede estar vacía.");
-                        break;
-                    }
-
-                    // Validar prioridad
-                    int prio = 0;
-                    boolean prioridadValida = false;
-                    while (!prioridadValida) {
-                        System.out.print("Prioridad (entero): ");
-                        String prioStr = scanner.nextLine().trim();
-                        if (viajeGestor.validarPrioridad(prioStr)) {
-                            prio = Integer.parseInt(prioStr);
-                            prioridadValida = true;
-                        } else {
-                            System.out.println("Error: La prioridad debe ser un número entero válido.");
-                        }
-                    }
-
-                    // Si todo es válido, crear el viaje
-                    try {
+                        // Crear viaje
                         Viaje v = new Viaje(viajeGestor.generarID(), origen, destino, m, fecha, prio);
                         viajeGestor.agregarViaje(v);
-                        if (m != null) microGestor.marcarMicroAsignado(pat);
+                        if (m != null) microGestor.marcarMicroAsignado(m.getIdPatente());
                         System.out.println("Viaje agregado correctamente.");
+                    } catch (DuplicateMicroException | DuplicateTerminalException | InvalidInputException e) {
+                        System.out.println("Error: " + e.getMessage());
                     } catch (Exception e) {
                         System.out.println("Error al agregar viaje: " + e.getMessage());
                     }
                     break;
                 case "3":
-                    System.out.print("ID Viaje a reprogramar : ");
-                    String idViaje = scanner.nextLine();
-                    System.out.print("Nueva Fecha: ");
-                    String nFecha = scanner.nextLine();
-                    System.out.print("Nueva Patente Micro (opcional): ");
-                    String nPat = scanner.nextLine();
-                    Micro nM = nPat.isEmpty() ? null : microGestor.obtenerMicro(nPat);
                     try {
+                        System.out.print("ID Viaje a reprogramar: ");
+                        String idViaje = scanner.nextLine().trim();
+                        if (idViaje.isEmpty()) throw new InvalidInputException("ID de viaje no puede estar vacío");
+
+                        System.out.print("Nueva Fecha: ");
+                        String nFecha = scanner.nextLine().trim();
+                        if (nFecha.isEmpty()) throw new InvalidInputException("La fecha no puede estar vacía");
+
+                        System.out.print("Nueva Patente Micro (opcional): ");
+                        String nPat = scanner.nextLine().trim().toUpperCase();
+                        Micro nM = null;
+                        if (!nPat.isEmpty()) {
+                            if (microGestor.existeMicro(nPat)) {
+                                nM = microGestor.obtenerMicro(nPat);
+                            } else {
+                                System.out.println("Micro con patente " + nPat + " no existe.");
+                                System.out.print("Desea crearlo? (s/n): ");
+                                String r = scanner.nextLine().trim().toLowerCase();
+                                if (r.equals("s") || r.equals("y")) {
+                                    if (!validarFormatoPatente(nPat)) {
+                                        nPat = solicitarPatenteMicro("Patente del micro (formato AA-NNN-AA): ");
+                                    }
+                                    TipoMicro tipo = solicitarTipoMicro();
+                                    microGestor.agregarMicro(new Micro(nPat, tipo));
+                                    nM = microGestor.obtenerMicro(nPat);
+                                } else {
+                                    System.out.println("No se asignará micro.");
+                                }
+                            }
+                        }
+
                         viajeGestor.reprogramarViaje(idViaje, nFecha, nM);
-                        if (nM != null) microGestor.marcarMicroAsignado(nPat);
+                        if (nM != null) microGestor.marcarMicroAsignado(nM.getIdPatente());
                         System.out.println("Viaje reprogramado.");
-                    } catch (Exception e) {
+                    } catch (ViajeNoEncontradoException | InvalidInputException e) {
                         System.out.println("Error: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Error inesperado: " + e.getMessage());
                     }
                     break;
                 case "4":
-                    System.out.print("ID Viaje a repriorizar: ");
-                    String idV = scanner.nextLine();
-                    System.out.print("Nueva Prioridad: ");
-                    int nPrio = Integer.parseInt(scanner.nextLine());
                     try {
+                        System.out.print("ID Viaje a repriorizar: ");
+                        String idV = scanner.nextLine().trim();
+                        if (idV.isEmpty()) throw new InvalidInputException("ID de viaje no puede estar vacío");
+
+                        System.out.print("Nueva Prioridad: ");
+                        String nPrioStr = scanner.nextLine().trim();
+                        if (!viajeGestor.validarPrioridad(nPrioStr)) {
+                            throw new InvalidPriorityException("Prioridad inválida");
+                        }
+                        int nPrio = Integer.parseInt(nPrioStr);
+
                         viajeGestor.rePriorizarViaje(idV, nPrio);
                         System.out.println("Prioridad actualizada.");
-                    } catch (Exception e) {
+                    } catch (ViajeNoEncontradoException | InvalidInputException | InvalidPriorityException e) {
                         System.out.println("Error: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Error inesperado: " + e.getMessage());
                     }
                     break;
                 case "0":
@@ -202,10 +259,16 @@ public class ConsoleMenu {
                     imprimirLista(microGestor.listarMicros());
                     break;
                 case "2":
-                    String pat = solicitarPatenteMicro("Patente del micro (formato AA-NNN-AA): ");
-                    TipoMicro tipo = solicitarTipoMicro();
-                    microGestor.agregarMicro(new Micro(pat, tipo));
-                    System.out.println("Micro agregado.");
+                    try {
+                        String pat = solicitarPatenteMicro("Patente del micro (formato AA-NNN-AA): ");
+                        TipoMicro tipo = solicitarTipoMicro();
+                        microGestor.agregarMicro(new Micro(pat, tipo));
+                        System.out.println("Micro agregado.");
+                    } catch (DuplicateMicroException e) {
+                        System.out.println("Error: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Error inesperado: " + e.getMessage());
+                    }
                     break;
                 case "3":
                     String pEdit = solicitarPatenteMicro("Patente a editar (formato AA-NNN-AA): ");
@@ -219,13 +282,15 @@ public class ConsoleMenu {
                     }
                     break;
                 case "4":
-                    String pdelete = solicitarPatenteMicro("Patente a eliminar (formato AA-NNN-AA): ");
-                    Micro mdelete = microGestor.obtenerMicro(pdelete);
-                    if (mdelete != null) {
-                        microGestor.eliminarMicro(mdelete.getIdPatente());
-
+                    try {
+                        String pdelete = solicitarPatenteMicro("Patente a eliminar (formato AA-NNN-AA): ");
+                        microGestor.eliminarMicro(pdelete);
+                        System.out.println("Micro eliminado.");
+                    } catch (MicroNotFoundException e) {
+                        System.out.println("Error: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Error inesperado: " + e.getMessage());
                     }
-                    System.out.println("Proceso finalizado.");
                     break;
                 case "5":
                     int total = microGestor.listarMicros().size();
@@ -267,20 +332,32 @@ public class ConsoleMenu {
                     imprimirLista(terminalGestor.listarTerminales());
                     break;
                 case "2":
-                    System.out.print("Código: ");
-                    String cod = scanner.nextLine();
-                    System.out.print("Descripción: ");
-                    String desc = scanner.nextLine();
-                    terminalGestor.agregarTerminal(new Terminal(cod, desc));
-                    System.out.println("Agregada.");
+                    try {
+                        System.out.print("Código: ");
+                        String cod = scanner.nextLine().trim();
+                        System.out.print("Descripción: ");
+                        String desc = scanner.nextLine().trim();
+                        if (cod.isEmpty() || desc.isEmpty()) {
+                            throw new InvalidInputException("Código y descripción no pueden estar vacíos");
+                        }
+                        terminalGestor.agregarTerminal(new Terminal(cod, desc));
+                        System.out.println("Agregada.");
+                    } catch (DuplicateTerminalException | InvalidInputException e) {
+                        System.out.println("Error: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Error inesperado: " + e.getMessage());
+                    }
                     break;
                 case "3":
                     System.out.print("Código a eliminar: ");
                     try {
-                        terminalGestor.eliminarTerminal(scanner.nextLine());
+                        String codigoEliminar = scanner.nextLine().trim();
+                        terminalGestor.eliminarTerminal(codigoEliminar);
                         System.out.println("Eliminada.");
-                    } catch(Exception e) {
-                        System.out.println(e.getMessage());
+                    } catch (TerminalNotFoundException e) {
+                        System.out.println("Error: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Error inesperado: " + e.getMessage());
                     }
                     break;
                 case "4":
@@ -344,26 +421,52 @@ public class ConsoleMenu {
                     }
                     break;
                 case "2":
-                    System.out.print("Origen: ");
-                    Terminal oCrear = terminalGestor.obtenerTerminal(scanner.nextLine());
-                    System.out.print("Destino: ");
-                    Terminal dCrear = terminalGestor.obtenerTerminal(scanner.nextLine());
-                    System.out.print("Distancia (peso): ");
-                    int dist = Integer.parseInt(scanner.nextLine());
                     try {
+                        System.out.print("Origen: ");
+                        String oCod = scanner.nextLine().trim();
+                        System.out.print("Destino: ");
+                        String dCod = scanner.nextLine().trim();
+                        if (!terminalGestor.existeTerminal(oCod) || !terminalGestor.existeTerminal(dCod)) {
+                            throw new TerminalNotFoundException("Ambas terminales deben existir para crear la ruta");
+                        }
+                        Terminal oCrear = terminalGestor.obtenerTerminal(oCod);
+                        Terminal dCrear = terminalGestor.obtenerTerminal(dCod);
+
+                        System.out.print("Distancia (peso): ");
+                        String distStr = scanner.nextLine().trim();
+                        int dist;
+                        try {
+                            dist = Integer.parseInt(distStr);
+                        } catch (NumberFormatException nfe) {
+                            throw new InvalidInputException("Distancia inválida");
+                        }
+
                         grafoRutas.conectarTerminales(oCrear, dCrear, dist);
                         System.out.println("Conectadas.");
-                    } catch(Exception e) { System.out.println(e.getMessage()); }
+                    } catch (TerminalNotFoundException | InvalidInputException e) {
+                        System.out.println("Error: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Error inesperado: " + e.getMessage());
+                    }
                     break;
                 case "3":
-                    System.out.print("Origen: ");
-                    Terminal oElim = terminalGestor.obtenerTerminal(scanner.nextLine());
-                    System.out.print("Destino: ");
-                    Terminal dElim = terminalGestor.obtenerTerminal(scanner.nextLine());
                     try {
+                        System.out.print("Origen: ");
+                        String oCod = scanner.nextLine().trim();
+                        System.out.print("Destino: ");
+                        String dCod = scanner.nextLine().trim();
+                        if (!terminalGestor.existeTerminal(oCod) || !terminalGestor.existeTerminal(dCod)) {
+                            throw new TerminalNotFoundException("Ambas terminales deben existir para eliminar la ruta");
+                        }
+                        Terminal oElim = terminalGestor.obtenerTerminal(oCod);
+                        Terminal dElim = terminalGestor.obtenerTerminal(dCod);
                         grafoRutas.eliminarConexion(oElim, dElim);
                         System.out.println("Ruta eliminada.");
-                    } catch(Exception e) { System.out.println(e.getMessage()); }
+                    } catch (TerminalNotFoundException e) {
+                        System.out.println("Error: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Error inesperado: " + e.getMessage());
+                    }
                     break;
                 case "4":
                     System.out.println("Reporte de rutas mas/menos utilizadas no implementado al 100%, se calcula en base a Viajes.");
