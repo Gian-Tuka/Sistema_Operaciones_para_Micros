@@ -25,6 +25,10 @@ public class MicroGestor {
         }
     }
 
+    public boolean existeMicro(String patente) {
+        return obtenerMicro(patente) != null;
+    }
+
     public Micro obtenerMicro(String idPatente) {
         return micros.get(idPatente);
     }

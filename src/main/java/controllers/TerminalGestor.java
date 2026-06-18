@@ -49,4 +49,8 @@ public class TerminalGestor {
         }
         return lista;
     }
+
+    public boolean existeTerminal(String codigo) {
+        return terminales.get(codigo) != null;
+    }
 }

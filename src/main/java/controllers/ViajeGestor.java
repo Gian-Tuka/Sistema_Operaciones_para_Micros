@@ -85,7 +85,59 @@ public class ViajeGestor {
             throw new RuntimeException("Viaje no encontrado");
         }
     }
+    public String generarID() {
+        // Generar un número aleatorio entre 1000 y 9999
+        int idGenerado = 1000 + (int) (Math.random() * 9000);
+        String idString = String.valueOf(idGenerado);
 
+        // Si el ID ya existe, generar uno nuevo recursivamente
+        if (!validarID(idString)) {
+            return generarID();
+        }
+
+        return idString;
+    }
+
+    public boolean validarPrioridad(String prioridadStr) {
+        if (prioridadStr == null || prioridadStr.trim().isEmpty()) {
+            return false;
+        }
+        try {
+            Integer.parseInt(prioridadStr);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    //validar id para que no se repita y este dentro de un ID 1000 a 9999
+    public Boolean validarID(String idViaje) {
+        // Validar que no sea nulo o vacío
+        if (idViaje == null || idViaje.isEmpty()) {
+            return false;
+        }
+
+        // Validar que sea un número
+        try {
+            int id = Integer.parseInt(idViaje);
+
+            // Validar que esté en el rango 1000-9999
+            if (id < 1000 || id > 9999) {
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            return false;
+        }
+
+        // Validar que el ID no esté duplicado
+        for (int i = 0; i < todosLosViajes.size(); i++) {
+            if (todosLosViajes.get(i).getIdViaje().equals(idViaje)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
     private void reconstruirCola() {
         PriorityQueueADT<Viaje> nuevaCola = new DynamicPriorityQueueADT<>();
         for (int i = 0; i < todosLosViajes.size(); i++) {
