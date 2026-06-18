@@ -41,7 +41,7 @@ public class Main {
         grafo.conectarTerminales(terminalGestor.obtenerTerminal("COR"), terminalGestor.obtenerTerminal("SLA"), 850);
 
         // 2. Cargar 15 Micros
-        for (int i = 1; i <= 15; i++) {
+        for (int i = 1; i <= 15; i++ ) {
             TipoMicro tipo = (i % 3 == 0) ? TipoMicro.CAMA : (i % 2 == 0) ? TipoMicro.SEMI_CAMA : TipoMicro.EJECUTIVO;
             // Formato: AA-NNN-AA (ej: AB-001-CD, AB-002-CD, etc.)
             String patente = "AB-" + String.format("%03d", i) + "-CD";
