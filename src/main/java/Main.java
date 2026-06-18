@@ -3,6 +3,7 @@ import controllers.GrafoRutas;
 import controllers.MicroGestor;
 import controllers.TerminalGestor;
 import controllers.ViajeGestor;
+import TDAs.structure.definition.LinkedListADT;
 import models.Micro;
 import models.Terminal;
 import models.TipoMicro;
@@ -42,17 +43,30 @@ public class Main {
         // 2. Cargar 15 Micros
         for (int i = 1; i <= 15; i++) {
             TipoMicro tipo = (i % 3 == 0) ? TipoMicro.CAMA : (i % 2 == 0) ? TipoMicro.SEMI_CAMA : TipoMicro.EJECUTIVO;
-            microGestor.agregarMicro(new Micro("MIC-" + String.format("%03d", i), tipo));
+            // Formato: AA-NNN-AA (ej: AB-001-CD, AB-002-CD, etc.)
+            String patente = "AB-" + String.format("%03d", i) + "-CD";
+            microGestor.agregarMicro(new Micro(patente, tipo));
         }
 
         // 3. Cargar 20 Viajes
-        for (int i = 1; i <= 20; i++) {
-            Terminal orig = terminalGestor.obtenerTerminal((i % 2 == 0) ? "BUE" : "ROS");
-            Terminal dest = terminalGestor.obtenerTerminal((i % 2 == 0) ? "ROS" : "COR");
-            Micro m = microGestor.obtenerMicro("MIC-" + String.format("%03d", (i % 15) + 1));
-            int prio = (i % 5) + 1; // Prioridad del 1 al 5
+        LinkedListADT<Terminal> todasTerminales = terminalGestor.listarTerminales();
+        LinkedListADT<Micro> todosMicros = microGestor.listarMicros();
 
-            Viaje v = new Viaje("V-" + i, orig, dest, m, "2026-07-0" + (i % 9 + 1), prio);
+        for (int i = 1; i <= 20; i++) {
+            // Seleccionar origen y destino de terminales existentes
+            int origIdx = (i - 1) % todasTerminales.size();
+            int destIdx = (i % todasTerminales.size());
+            Terminal orig = todasTerminales.get(origIdx);
+            Terminal dest = todasTerminales.get(destIdx);
+
+            // Asignar micro existente
+            int microIdx = (i - 1) % todosMicros.size();
+            Micro m = todosMicros.get(microIdx);
+
+            int prio = (i % 5) + 1; // Prioridad del 1 al 5
+            String fecha = "2026-07-" + String.format("%02d", (i % 28) + 1);
+
+            Viaje v = new Viaje("V-" + i, orig, dest, m, fecha, prio);
             viajeGestor.agregarViaje(v);
             microGestor.marcarMicroAsignado(m.getIdPatente());
         }
