@@ -79,13 +79,77 @@ public class ConsoleMenu {
                 case "2":
                     System.out.print("ID Viaje: ");
                     String id = scanner.nextLine();
-                    System.out.print("Codigo Origen: ");
-                    Terminal origen = terminalGestor.obtenerTerminal(scanner.nextLine());
-                    System.out.print("Codigo Destino: ");
-                    Terminal destino = terminalGestor.obtenerTerminal(scanner.nextLine());
-                    System.out.print("Patente Micro Asignado (opcional, enter para saltar): ");
-                    String pat = scanner.nextLine();
-                    Micro m = pat.isEmpty() ? null : microGestor.obtenerMicro(pat);
+
+                    // Seleccionar Terminal Origen
+                    LinkedListADT<Terminal> terminales = terminalGestor.listarTerminales();
+                    System.out.println("\nSeleccione Terminal Origen:");
+                    for (int i = 0; i < terminales.size(); i++) {
+                        System.out.println((i + 1) + ". " + terminales.get(i).getCodigo() + " - " + terminales.get(i).getDescripcion());
+                    }
+                    int origIdx = -1;
+                    while (origIdx < 0 || origIdx >= terminales.size()) {
+                        System.out.print("Ingrese el número: ");
+                        try {
+                            origIdx = Integer.parseInt(scanner.nextLine()) - 1;
+                            if (origIdx < 0 || origIdx >= terminales.size()) {
+                                System.out.println("Opción inválida.");
+                                origIdx = -1;
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("Entrada inválida.");
+                        }
+                    }
+                    Terminal origen = terminales.get(origIdx);
+
+                    // Seleccionar Terminal Destino
+                    System.out.println("\nSeleccione Terminal Destino:");
+                    for (int i = 0; i < terminales.size(); i++) {
+                        System.out.println((i + 1) + ". " + terminales.get(i).getCodigo() + " - " + terminales.get(i).getDescripcion());
+                    }
+                    int destIdx = -1;
+                    while (destIdx < 0 || destIdx >= terminales.size()) {
+                        System.out.print("Ingrese el número: ");
+                        try {
+                            destIdx = Integer.parseInt(scanner.nextLine()) - 1;
+                            if (destIdx < 0 || destIdx >= terminales.size()) {
+                                System.out.println("Opción inválida.");
+                                destIdx = -1;
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("Entrada inválida.");
+                        }
+                    }
+                    Terminal destino = terminales.get(destIdx);
+
+                    // Seleccionar Micro (opcional)
+                    System.out.print("¿Desea asignar un micro? (s/n): ");
+                    Micro m = null;
+                    if (scanner.nextLine().toLowerCase().equals("s")) {
+                        LinkedListADT<Micro> micros = microGestor.listarMicrosDisponibles();
+                        if (micros.size() == 0) {
+                            System.out.println("No hay micros disponibles.");
+                        } else {
+                            System.out.println("\nMicros Disponibles:");
+                            for (int i = 0; i < micros.size(); i++) {
+                                System.out.println((i + 1) + ". " + micros.get(i).getIdPatente() + " - " + micros.get(i).getTipo());
+                            }
+                            int microIdx = -1;
+                            while (microIdx < 0 || microIdx >= micros.size()) {
+                                System.out.print("Ingrese el número: ");
+                                try {
+                                    microIdx = Integer.parseInt(scanner.nextLine()) - 1;
+                                    if (microIdx < 0 || microIdx >= micros.size()) {
+                                        System.out.println("Opción inválida.");
+                                        microIdx = -1;
+                                    }
+                                } catch (NumberFormatException e) {
+                                    System.out.println("Entrada inválida.");
+                                }
+                            }
+                            m = micros.get(microIdx);
+                        }
+                    }
+
                     System.out.print("Fecha: ");
                     String fecha = scanner.nextLine();
                     System.out.print("Prioridad (entero): ");
@@ -94,7 +158,7 @@ public class ConsoleMenu {
                     if (origen != null && destino != null) {
                         Viaje v = new Viaje(id, origen, destino, m, fecha, prio);
                         viajeGestor.agregarViaje(v);
-                        if (m != null) microGestor.marcarMicroAsignado(pat);
+                        if (m != null) microGestor.marcarMicroAsignado(m.getIdPatente());
                         System.out.println("Viaje agregado.");
                     } else {
                         System.out.println("Origen o destino no válidos.");
@@ -105,12 +169,39 @@ public class ConsoleMenu {
                     String idViaje = scanner.nextLine();
                     System.out.print("Nueva Fecha: ");
                     String nFecha = scanner.nextLine();
-                    System.out.print("Nueva Patente Micro (opcional): ");
-                    String nPat = scanner.nextLine();
-                    Micro nM = nPat.isEmpty() ? null : microGestor.obtenerMicro(nPat);
+                    
+                    // Seleccionar Micro (opcional)
+                    System.out.print("¿Desea cambiar el micro? (s/n): ");
+                    Micro nM = null;
+                    if (scanner.nextLine().toLowerCase().equals("s")) {
+                        LinkedListADT<Micro> micros = microGestor.listarMicrosDisponibles();
+                        if (micros.size() == 0) {
+                            System.out.println("No hay micros disponibles.");
+                        } else {
+                            System.out.println("\nMicros Disponibles:");
+                            for (int i = 0; i < micros.size(); i++) {
+                                System.out.println((i + 1) + ". " + micros.get(i).getIdPatente() + " - " + micros.get(i).getTipo());
+                            }
+                            int microIdx = -1;
+                            while (microIdx < 0 || microIdx >= micros.size()) {
+                                System.out.print("Ingrese el número: ");
+                                try {
+                                    microIdx = Integer.parseInt(scanner.nextLine()) - 1;
+                                    if (microIdx < 0 || microIdx >= micros.size()) {
+                                        System.out.println("Opción inválida.");
+                                        microIdx = -1;
+                                    }
+                                } catch (NumberFormatException e) {
+                                    System.out.println("Entrada inválida.");
+                                }
+                            }
+                            nM = micros.get(microIdx);
+                        }
+                    }
+                    
                     try {
                         viajeGestor.reprogramarViaje(idViaje, nFecha, nM);
-                        if (nM != null) microGestor.marcarMicroAsignado(nPat);
+                        if (nM != null) microGestor.marcarMicroAsignado(nM.getIdPatente());
                         System.out.println("Viaje reprogramado.");
                     } catch (Exception e) {
                         System.out.println("Error: " + e.getMessage());
@@ -156,10 +247,33 @@ public class ConsoleMenu {
                     imprimirLista(microGestor.listarMicros());
                     break;
                 case "2":
-                    System.out.print("Patente de miecros: ");
-                    String pat = scanner.nextLine();
-                    System.out.print("Tipo (EJECUTIVO, SEMI_CAMA, CAMA): ");
-                    TipoMicro tipo = TipoMicro.valueOf(scanner.nextLine().toUpperCase());
+                    String pat = "";
+                    boolean patenteValida = false;
+                    while (!patenteValida) {
+                        System.out.print("Ingrese la patente del nuevo micro (formato: AA-NNN-AA): ");
+                        pat = scanner.nextLine();
+                        if (validarFormatoPatente(pat)) {
+                            patenteValida = true;
+                        } else {
+                            System.out.println("Formato inválido. Debe ser: Letra-Letra-Numero-Numero-Numero-Letra-Letra (ej: AB-123-CD)");
+                        }
+                    }
+
+                    int opcionTipo = -1;
+                    while (opcionTipo < 1 || opcionTipo > 3) {
+                        System.out.print("Tipo (1.EJECUTIVO, 2.SEMI_CAMA, 3.CAMA): ");
+                        try {
+                            opcionTipo = Integer.parseInt(scanner.nextLine());
+                            if (opcionTipo < 1 || opcionTipo > 3) {
+                                System.out.println("Opción inválida. Ingrese 1, 2 o 3.");
+                            }
+                        } catch (NumberFormatException e) {
+                            System.out.println("Entrada inválida. Ingrese un número (1, 2 o 3).");
+                            opcionTipo = -1;
+                        }
+                    }
+
+                    TipoMicro tipo = obtenerTipoMicroDesdeOpcion(opcionTipo);
                     microGestor.agregarMicro(new Micro(pat, tipo));
                     System.out.println("Micro agregado.");
                     break;
@@ -348,6 +462,23 @@ public class ConsoleMenu {
         }
         for (int i = 0; i < lista.size(); i++) {
             System.out.println("- " + lista.get(i).toString());
+        }
+    }
+
+    private boolean validarFormatoPatente(String patente) {
+        return patente.matches("^[A-Z]{2}-\\d{3}-[A-Z]{2}$");
+    }
+
+    private TipoMicro obtenerTipoMicroDesdeOpcion(int opcion) {
+        switch (opcion) {
+            case 1:
+                return TipoMicro.EJECUTIVO;
+            case 2:
+                return TipoMicro.SEMI_CAMA;
+            case 3:
+                return TipoMicro.CAMA;
+            default:
+                return TipoMicro.EJECUTIVO;
         }
     }
 }
