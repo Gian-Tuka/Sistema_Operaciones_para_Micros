@@ -159,7 +159,7 @@ public class ConsoleMenu {
                     imprimirLista(microGestor.listarMicros());
                     break;
                 case "2":
-                    System.out.print("Patente: ");
+                    System.out.print("Patente de miecros: ");
                     String pat = scanner.nextLine();
                     System.out.print("Tipo (EJECUTIVO, SEMI_CAMA, CAMA): ");
                     TipoMicro tipo = TipoMicro.valueOf(scanner.nextLine().toUpperCase());
