@@ -48,7 +48,7 @@ public class Main {
             microGestor.agregarMicro(new Micro(patente, tipo));
         }
 
-        // 3. Cargar 20 Viajes
+        // 3. Cargar 20 Viajess
         LinkedListADT<Terminal> todasTerminales = terminalGestor.listarTerminales();
         LinkedListADT<Micro> todosMicros = microGestor.listarMicros();
 
