@@ -156,18 +156,14 @@ public class ConsoleMenu {
                     imprimirLista(microGestor.listarMicros());
                     break;
                 case "2":
-                    System.out.print("Patente de miecros: ");
-                    String pat = scanner.nextLine();
-                    System.out.print("Tipo (EJECUTIVO, SEMI_CAMA, CAMA): ");
-                    TipoMicro tipo = TipoMicro.valueOf(scanner.nextLine().toUpperCase());
+                    String pat = solicitarPatenteMicro("Patente del micro (formato AA-NNN-AA): ");
+                    TipoMicro tipo = solicitarTipoMicro();
                     microGestor.agregarMicro(new Micro(pat, tipo));
                     System.out.println("Micro agregado.");
                     break;
                 case "3":
-                    System.out.print("Patente a editar: ");
-                    String pEdit = scanner.nextLine();
-                    System.out.print("Disponible? (true/false): ");
-                    boolean disp = Boolean.parseBoolean(scanner.nextLine());
+                    String pEdit = solicitarPatenteMicro("Patente a editar (formato AA-NNN-AA): ");
+                    boolean disp = solicitarBooleano("Disponible? (true/false): ");
                     Micro mEdit = microGestor.obtenerMicro(pEdit);
                     if (mEdit != null) {
                         mEdit.setDisponible(disp);
@@ -177,8 +173,7 @@ public class ConsoleMenu {
                     }
                     break;
                 case "4":
-                    System.out.print("Patente a eliminar: ");
-                    String pdelete = scanner.nextLine();
+                    String pdelete = solicitarPatenteMicro("Patente a eliminar (formato AA-NNN-AA): ");
                     Micro mdelete = microGestor.obtenerMicro(pdelete);
                     if (mdelete != null) {
                         microGestor.eliminarMicro(mdelete.getIdPatente());
@@ -299,7 +294,7 @@ public class ConsoleMenu {
                             }
                             System.out.println();
                         }
-                        if (rutas.size() == 0) System.out.println("No hay rutas posibles.");
+                        if (rutas.isEmpty()) System.out.println("No hay rutas posibles.");
                     }
                     break;
                 case "2":
@@ -342,12 +337,62 @@ public class ConsoleMenu {
     }
 
     private <T> void imprimirLista(LinkedListADT<T> lista) {
-        if (lista.size() == 0) {
+        if (lista.isEmpty()) {
             System.out.println("No hay elementos.");
             return;
         }
         for (int i = 0; i < lista.size(); i++) {
             System.out.println("- " + lista.get(i).toString());
+        }
+    }
+
+    private String solicitarPatenteMicro(String mensaje) {
+        while (true) {
+            System.out.print(mensaje);
+            String patente = scanner.nextLine().toUpperCase();
+            if (validarFormatoPatente(patente)) {
+                return patente;
+            }
+            System.out.println("Formato inválido. Debe ser AA-NNN-AA (ej: AB-123-CD).");
+        }
+    }
+
+    private boolean validarFormatoPatente(String patente) {
+        return patente.matches("^[A-Z]{2}-\\d{3}-[A-Z]{2}$");
+    }
+
+    private TipoMicro solicitarTipoMicro() {
+        while (true) {
+            System.out.println("Tipo:");
+            System.out.println("1- EJECUTIVO");
+            System.out.println("2- SEMI_CAMA");
+            System.out.println("3- CAMA");
+            System.out.print("Seleccione una opción: ");
+
+            switch (scanner.nextLine()) {
+                case "1":
+                    return TipoMicro.EJECUTIVO;
+                case "2":
+                    return TipoMicro.SEMI_CAMA;
+                case "3":
+                    return TipoMicro.CAMA;
+                default:
+                    System.out.println("Opción inválida. Ingrese 1, 2 o 3.");
+            }
+        }
+    }
+
+    private boolean solicitarBooleano(String mensaje) {
+        while (true) {
+            System.out.print(mensaje);
+            String valor = scanner.nextLine().trim().toLowerCase();
+            if (valor.equals("true")) {
+                return true;
+            }
+            if (valor.equals("false")) {
+                return false;
+            }
+            System.out.println("Entrada inválida. Ingrese true o false.");
         }
     }
 }
