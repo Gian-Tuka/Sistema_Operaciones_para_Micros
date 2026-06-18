@@ -63,7 +63,7 @@ public class ConsoleMenu {
         boolean volver = false;
         while (!volver) {
             System.out.println("\n--- MENU VIAJES ---");
-            System.out.println("1- Ver viajes (pendientes e historial)");
+            System.out.println("1- Ver viajes (historial)");
             System.out.println("2- Agregar viaje");
             System.out.println("3- Reprogramar viaje");
             System.out.println("4- Re-priorizar viaje");
@@ -73,9 +73,6 @@ public class ConsoleMenu {
 
             switch (opcion) {
                 case "1":
-                    System.out.println("\n[Viajes Pendientes por Prioridad]");
-                    LinkedListADT<Viaje> pendientes = viajeGestor.listarViajesPendientes();
-                    imprimirLista(pendientes);
                     System.out.println("\n[Historial de Todos los Viajes]");
                     imprimirLista(viajeGestor.listarViajes());
                     break;
