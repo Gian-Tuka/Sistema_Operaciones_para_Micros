@@ -101,7 +101,7 @@ public class ConsoleMenu {
                     }
                     break;
                 case "3":
-                    System.out.print("ID Viaje a reprogramar: ");
+                    System.out.print("ID Viaje a reprogramar : ");
                     String idViaje = scanner.nextLine();
                     System.out.print("Nueva Fecha: ");
                     String nFecha = scanner.nextLine();
