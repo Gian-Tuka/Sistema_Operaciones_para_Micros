@@ -18,25 +18,31 @@ public class MicroGestor {
     }
 
     public void agregarMicro(Micro micro) {
-        if (existeMicro(micro.getIdPatente())) {
+        // Evitar llamar a get() sobre un diccionario vacío: usar getKeys().exist()
+        if (micros.getKeys().exist(micro.getIdPatente())) {
             throw new DuplicateMicroException("Micro con patente " + micro.getIdPatente() + " ya existe");
         }
         micros.add(micro.getIdPatente(), micro);
     }
 
     public void eliminarMicro(String idPatente) {
-        if (!existeMicro(idPatente)) {
+        if (!micros.getKeys().exist(idPatente)) {
             throw new MicroNotFoundException("Micro con patente " + idPatente + " no encontrado");
         }
         micros.remove(idPatente);
     }
 
     public boolean existeMicro(String patente) {
-        return obtenerMicro(patente) != null;
+        // Safe existence check without throwing on empty dictionary
+        return micros.getKeys().exist(patente);
     }
 
     public Micro obtenerMicro(String idPatente) {
-        return micros.get(idPatente);
+        try {
+            return micros.get(idPatente);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public LinkedListADT<Micro> listarMicros() {

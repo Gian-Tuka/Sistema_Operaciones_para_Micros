@@ -18,7 +18,8 @@ public class TerminalGestor {
     }
 
     public void agregarTerminal(Terminal terminal) {
-        if (terminales.get(terminal.getCodigo()) != null) {
+        // Evitar llamar a get() sobre un diccionario vacío: usar getKeys().exist()
+        if (terminales.getKeys().exist(terminal.getCodigo())) {
             throw new DuplicateTerminalException("Terminal con codigo " + terminal.getCodigo() + " ya existe");
         }
         terminales.add(terminal.getCodigo(), terminal);
@@ -26,17 +27,20 @@ public class TerminalGestor {
     }
 
     public void eliminarTerminal(String codigo) {
-        Terminal t = terminales.get(codigo);
-        if (t != null) {
-            terminales.remove(codigo);
-            GrafoRutas.getInstance().eliminarTerminal(t);
-        } else {
+        if (!terminales.getKeys().exist(codigo)) {
             throw new TerminalNotFoundException("Terminal con codigo " + codigo + " no encontrada");
         }
+        Terminal t = terminales.get(codigo);
+        terminales.remove(codigo);
+        GrafoRutas.getInstance().eliminarTerminal(t);
     }
 
     public Terminal obtenerTerminal(String codigo) {
-        return terminales.get(codigo);
+        try {
+            return terminales.get(codigo);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public LinkedListADT<Terminal> listarTerminales() {
@@ -56,6 +60,6 @@ public class TerminalGestor {
     }
 
     public boolean existeTerminal(String codigo) {
-        return terminales.get(codigo) != null;
+        return terminales.getKeys().exist(codigo);
     }
 }
