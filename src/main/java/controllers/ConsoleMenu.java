@@ -77,27 +77,73 @@ public class ConsoleMenu {
                     imprimirLista(viajeGestor.listarViajes());
                     break;
                 case "2":
-                    System.out.print("ID Viaje: ");
-                    String id = scanner.nextLine();
-                    System.out.print("Codigo Origen: ");
-                    Terminal origen = terminalGestor.obtenerTerminal(scanner.nextLine());
-                    System.out.print("Codigo Destino: ");
-                    Terminal destino = terminalGestor.obtenerTerminal(scanner.nextLine());
-                    System.out.print("Patente Micro Asignado (opcional, enter para saltar): ");
-                    String pat = scanner.nextLine();
-                    Micro m = pat.isEmpty() ? null : microGestor.obtenerMicro(pat);
-                    System.out.print("Fecha: ");
-                    String fecha = scanner.nextLine();
-                    System.out.print("Prioridad (entero): ");
-                    int prio = Integer.parseInt(scanner.nextLine());
+                    // Validar terminal origen
+                    Terminal origen = null;
+                    while (origen == null) {
+                        System.out.print("Codigo Origen: ");
+                        String codOrigen = scanner.nextLine().trim();
+                        if (terminalGestor.existeTerminal(codOrigen)) {
+                            origen = terminalGestor.obtenerTerminal(codOrigen);
+                        } else {
+                            System.out.println("Error: Terminal origen no existe.");
+                        }
+                    }
 
-                    if (origen != null && destino != null) {
-                        Viaje v = new Viaje(id, origen, destino, m, fecha, prio);
+                    // Validar terminal destino
+                    Terminal destino = null;
+                    while (destino == null) {
+                        System.out.print("Codigo Destino: ");
+                        String codDestino = scanner.nextLine().trim();
+                        if (terminalGestor.existeTerminal(codDestino)) {
+                            destino = terminalGestor.obtenerTerminal(codDestino);
+                        } else {
+                            System.out.println("Error: Terminal destino no existe.");
+                        }
+                    }
+
+                    // Validar micro (opcional)
+                    Micro m = null;
+                    System.out.print("Patente Micro Asignado (opcional, enter para saltar): ");
+                    String pat = scanner.nextLine().trim();
+                    if (!pat.isEmpty()) {
+                        if (microGestor.existeMicro(pat)) {
+                            m = microGestor.obtenerMicro(pat);
+                        } else {
+                            System.out.println("Error: Micro con patente " + pat + " no existe.");
+                            break;
+                        }
+                    }
+
+                    // Validar fecha (no vacía)
+                    System.out.print("Fecha: ");
+                    String fecha = scanner.nextLine().trim();
+                    if (fecha.isEmpty()) {
+                        System.out.println("Error: La fecha no puede estar vacía.");
+                        break;
+                    }
+
+                    // Validar prioridad
+                    int prio = 0;
+                    boolean prioridadValida = false;
+                    while (!prioridadValida) {
+                        System.out.print("Prioridad (entero): ");
+                        String prioStr = scanner.nextLine().trim();
+                        if (viajeGestor.validarPrioridad(prioStr)) {
+                            prio = Integer.parseInt(prioStr);
+                            prioridadValida = true;
+                        } else {
+                            System.out.println("Error: La prioridad debe ser un número entero válido.");
+                        }
+                    }
+
+                    // Si todo es válido, crear el viaje
+                    try {
+                        Viaje v = new Viaje(viajeGestor.generarID(), origen, destino, m, fecha, prio);
                         viajeGestor.agregarViaje(v);
                         if (m != null) microGestor.marcarMicroAsignado(pat);
-                        System.out.println("Viaje agregado.");
-                    } else {
-                        System.out.println("Origen o destino no válidos.");
+                        System.out.println("Viaje agregado correctamente.");
+                    } catch (Exception e) {
+                        System.out.println("Error al agregar viaje: " + e.getMessage());
                     }
                     break;
                 case "3":
