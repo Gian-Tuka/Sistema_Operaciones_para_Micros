@@ -2,9 +2,12 @@ package controllers;
 
 import TDAs.structure.definition.LinkedListADT;
 import TDAs.structure.definition.PriorityQueueADT;
+import TDAs.structure.definition.SimpleDictionaryADT;
 import TDAs.structure.implementation.dynamic.DynamicLinkedListADT;
 import TDAs.structure.implementation.dynamic.DynamicPriorityQueueADT;
+import TDAs.structure.implementation.dynamic.DynamicSimpleDictionaryADT;
 import models.Micro;
+import models.Terminal;
 import models.Viaje;
 import exception.ViajeNoEncontradoException;
 import exception.ViajeDuplicadoException;
@@ -29,7 +32,7 @@ public class ViajeGestor {
     }
 
     public LinkedListADT<Viaje> listarViajesPendientes() {
-        // Hacemos una copia destructiva de la cola para listarla sin perder datos reales, 
+        // Hacemos una copia destructiva de la cola para listarla sin perder datos reales,
         // o mejor solo devolvemos una lista ordenada usando la priority queue.
         LinkedListADT<Viaje> lista = new DynamicLinkedListADT<>();
         PriorityQueueADT<Viaje> colaAux = new DynamicPriorityQueueADT<>();
@@ -49,6 +52,41 @@ public class ViajeGestor {
         }
 
         return lista;
+    }
+
+    public SimpleDictionaryADT<String, Integer> contarSalidas() {
+        SimpleDictionaryADT<String, Integer> salidas = new DynamicSimpleDictionaryADT<>();
+
+        for (int i = 0; i < todosLosViajes.size(); i++) {
+            String codOrigen = todosLosViajes.get(i).getOrigen().getCodigo();
+            try {
+                int count = salidas.get(codOrigen);
+                salidas.remove(codOrigen);
+                salidas.add(codOrigen, count + 1);
+            } catch (Exception e) {
+                // Si no existe la clave, la agregamos con valor 1
+                salidas.add(codOrigen, 1);
+            }
+        }
+        return salidas;
+    }
+
+    /** * Cuenta cuántas veces cada terminal es destino de un viaje * @return SimpleDictionaryADT con Terminal como clave y cantidad de llegadas como valor */
+    public SimpleDictionaryADT<String, Integer> contarLlegadas() {
+        SimpleDictionaryADT<String, Integer> llegadas = new DynamicSimpleDictionaryADT<>();
+
+        for (int i = 0; i < todosLosViajes.size(); i++) {
+            String codDestino = todosLosViajes.get(i).getDestino().getCodigo();
+            try {
+                int count = llegadas.get(codDestino);
+                llegadas.remove(codDestino);
+                llegadas.add(codDestino, count + 1);
+            } catch (Exception e) {
+                // Si no existe la clave, la agregamos con valor 1
+                llegadas.add(codDestino, 1);
+            }
+        }
+        return llegadas;
     }
 
     public void reprogramarViaje(String idViaje, String nuevaFecha, Micro nuevoMicro) {
@@ -87,6 +125,7 @@ public class ViajeGestor {
             throw new ViajeNoEncontradoException("Viaje con ID " + idViaje + " no encontrado");
         }
     }
+
     public String generarID() {
         // Generar un número aleatorio entre 1000 y 9999
         int idGenerado = 1000 + (int) (Math.random() * 9000);
@@ -140,6 +179,18 @@ public class ViajeGestor {
 
         return true;
     }
+
+    /**     * Valida que no exista otro viaje con el mismo origen y destino.     * @param origen Terminal de origen     * @param destino Terminal de destino     * @return true si ya existe un viaje con ese par origen-destino     */
+    public boolean existeViajeConOriginDestino(Terminal origen, Terminal destino) {
+        for (int i = 0; i < todosLosViajes.size(); i++) {
+            Viaje v = todosLosViajes.get(i);
+            if (v.getOrigen().equals(origen) && v.getDestino().equals(destino)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void reconstruirCola() {
         PriorityQueueADT<Viaje> nuevaCola = new DynamicPriorityQueueADT<>();
         for (int i = 0; i < todosLosViajes.size(); i++) {

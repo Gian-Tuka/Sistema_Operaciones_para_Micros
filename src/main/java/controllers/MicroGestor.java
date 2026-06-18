@@ -50,15 +50,24 @@ public class MicroGestor {
         if (micros.isEmpty()) return lista;
 
         SetADT<String> keys = micros.getKeys();
+        LinkedListADT<String> keysCopia = new DynamicLinkedListADT<>();
+
+        // Copiar todas las claves
         while (!keys.isEmpty()) {
             try {
                 String key = keys.choose();
-                lista.add(micros.get(key));
+                keysCopia.add(key);
                 keys.remove(key);
             } catch (Exception e) {
                 break;
             }
         }
+
+        // Agregar micros a la lista
+        for (int i = 0; i < keysCopia.size(); i++) {
+            lista.add(micros.get(keysCopia.get(i)));
+        }
+
         return lista;
     }
 

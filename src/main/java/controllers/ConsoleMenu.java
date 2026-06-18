@@ -1,6 +1,9 @@
 package controllers;
 
 import TDAs.structure.definition.LinkedListADT;
+import TDAs.structure.definition.SetADT;
+import TDAs.structure.definition.SimpleDictionaryADT;
+import TDAs.structure.implementation.dynamic.DynamicLinkedListADT;
 import models.Micro;
 import models.Terminal;
 import models.TipoMicro;
@@ -64,7 +67,7 @@ public class ConsoleMenu {
         boolean volver = false;
         while (!volver) {
             System.out.println("\n--- MENU VIAJES ---");
-            System.out.println("1- Ver viajes (historial)");
+            System.out.println("1- Ver viajes (Pendientes e historial)");
             System.out.println("2- Agregar viaje");
             System.out.println("3- Reprogramar viaje");
             System.out.println("4- Re-priorizar viaje");
@@ -74,7 +77,10 @@ public class ConsoleMenu {
 
             switch (opcion) {
                 case "1":
-                    System.out.println("\n[Historial de Todos los Viajes]");
+                    System.out.println("\n [Viajes pendientes]");
+                    LinkedListADT<Viaje> viajesPendientes = viajeGestor.listarViajesPendientes();
+                    imprimirLista(viajesPendientes);
+                    System.out.println("\n[Historial de viajes]");
                     imprimirLista(viajeGestor.listarViajes());
                     break;
                 case "2":
@@ -97,20 +103,41 @@ public class ConsoleMenu {
 
                         // Destino
                         Terminal destino = null;
-                            while (destino == null) {
-                                    System.out.print("Codigo Destino: ");
-                                    String codDestino = scanner.nextLine().trim().toUpperCase();
+                        boolean cancelarDestino = false;
+                        while (destino == null && !cancelarDestino) {
+                            System.out.print("Codigo Destino (o 'SALIR' para cancelar): ");
+                            String codDestino = scanner.nextLine().trim().toUpperCase();
+
+                            if (codDestino.equals("SALIR")) {
+                                cancelarDestino = true;
+                                System.out.println("Operación cancelada.");
+                                break;
+                            }
+
                             if (codDestino.isEmpty()) {
                                 System.out.println("Error: Codigo de destino no puede estar vacío.");
                                 continue;
                             }
                             if (terminalGestor.existeTerminal(codDestino)) {
                                 destino = terminalGestor.obtenerTerminal(codDestino);
+
+                                if (!grafoRutas.existeRuta(origen, destino)) {
+                                    System.out.println("Error: No existe ruta directa entre " + origen.getCodigo() +
+                                            " y " + destino.getCodigo() + ". Debe crearla primero en el menú de Rutas.");
+                                    destino = null;
+                                    continue;
+                                }
+
+                                if (viajeGestor.existeViajeConOriginDestino(origen, destino)) {
+                                    throw new ViajeDuplicadoException("Ya existe un viaje con ruta " + origen.getCodigo() +
+                                            " -> " + destino.getCodigo());
+                                }
                             } else {
                                 System.out.println("Error: Terminal destino no existe.");
                             }
                         }
 
+                        if (cancelarDestino) break;
                         // Patente micro (opcional). Si se ingresa una patente nueva, ofrecer crear el micro.
                         Micro m = null;
                         System.out.print("Patente Micro Asignado (opcional, enter para saltar): ");
@@ -271,19 +298,27 @@ public class ConsoleMenu {
                     }
                     break;
                 case "3":
-                    String pEdit = solicitarPatenteMicro("Patente a editar (formato AA-NNN-AA): ");
-                    boolean disp = solicitarBooleano("Disponible? (true/false): ");
-                    Micro mEdit = microGestor.obtenerMicro(pEdit);
-                    if (mEdit != null) {
+                    try {
+                        String pEdit = solicitarPatenteMicro("Patente a editar (formato AA-NNN-AA): ");
+                        if (!microGestor.existeMicro(pEdit)) {
+                            throw new MicroNotFoundException("Micro con patente " + pEdit + " no existe");
+                        }
+                        boolean disp = solicitarBooleano("Disponible? (true/false): ");
+                        Micro mEdit = microGestor.obtenerMicro(pEdit);
                         mEdit.setDisponible(disp);
-                        System.out.println("Editado.");
-                    } else {
-                        System.out.println("No encontrado.");
+                        System.out.println("Micro editado.");
+                    } catch (MicroNotFoundException e) {
+                        System.out.println("Error: " + e.getMessage());
+                    } catch (Exception e) {
+                        System.out.println("Error inesperado: " + e.getMessage());
                     }
                     break;
                 case "4":
                     try {
                         String pdelete = solicitarPatenteMicro("Patente a eliminar (formato AA-NNN-AA): ");
+                        if (!microGestor.existeMicro(pdelete)) {
+                            throw new MicroNotFoundException("Micro con patente " + pdelete + " no existe");
+                        }
                         microGestor.eliminarMicro(pdelete);
                         System.out.println("Micro eliminado.");
                     } catch (MicroNotFoundException e) {
@@ -333,15 +368,15 @@ public class ConsoleMenu {
                     break;
                 case "2":
                     try {
-                        System.out.print("Código: ");
-                        String cod = scanner.nextLine().trim();
+                        System.out.print("Código (provincia argentina): ");
+                        String cod = scanner.nextLine().trim().toUpperCase();
                         System.out.print("Descripción: ");
                         String desc = scanner.nextLine().trim();
                         if (cod.isEmpty() || desc.isEmpty()) {
                             throw new InvalidInputException("Código y descripción no pueden estar vacíos");
                         }
                         terminalGestor.agregarTerminal(new Terminal(cod, desc));
-                        System.out.println("Agregada.");
+                        System.out.println("Terminal agregada.");
                     } catch (DuplicateTerminalException | InvalidInputException e) {
                         System.out.println("Error: " + e.getMessage());
                     } catch (Exception e) {
@@ -362,20 +397,94 @@ public class ConsoleMenu {
                     break;
                 case "4":
                     System.out.print("Código Terminal para ver conexiones directas: ");
-                    Terminal t = terminalGestor.obtenerTerminal(scanner.nextLine().trim().toUpperCase());
+                    String codBuscar = scanner.nextLine().trim().toUpperCase();
+                    Terminal t = terminalGestor.obtenerTerminal(codBuscar);
                     if (t != null) {
                         LinkedListADT<Terminal> todas = terminalGestor.listarTerminales();
                         System.out.println("Conexiones directas desde " + t.getCodigo() + ":");
+                        boolean tieneConexiones = false;
                         for (int i = 0; i < todas.size(); i++) {
                             if (grafoRutas.existeRuta(t, todas.get(i))) {
                                 System.out.println("- " + todas.get(i).getCodigo());
+                                tieneConexiones = true;
                             }
                         }
+                        if (!tieneConexiones) {
+                            System.out.println("No hay conexiones directas desde esta terminal.");
+                        }
+                    } else {
+                        System.out.println("Error: Terminal con código " + codBuscar + " no existe.");
                     }
                     break;
                 case "5":
-                    System.out.println("Este reporte iteraría sobre todos los viajes para contar origen/destino.");
-                    System.out.println("Actualmente hay " + viajeGestor.listarViajes().size() + " viajes registrados.");
+                    SimpleDictionaryADT<String, Integer> salidas = viajeGestor.contarSalidas();
+                    SimpleDictionaryADT<String, Integer> llegadas = viajeGestor.contarLlegadas();
+
+                    SetADT<String> keySalidas = salidas.getKeys();
+                    SetADT<String> keyLlegadas = llegadas.getKeys();
+
+                    if (salidas.isEmpty() && llegadas.isEmpty()) {
+                        System.out.println("No hay viajes registrados.");
+                        break;
+                    }
+
+                    // Encontrar máximo de salidas
+                    int maxSalidas = 0;
+                    SetADT<String> tempKeySalidas = salidas.getKeys();
+                    LinkedListADT<String> salidaKeysCopia = new DynamicLinkedListADT<>();
+                    while (!tempKeySalidas.isEmpty()) {
+                        String key = tempKeySalidas.choose();
+                        salidaKeysCopia.add(key);
+                        tempKeySalidas.remove(key);
+                    }
+
+                    for (int i = 0; i < salidaKeysCopia.size(); i++) {
+                        int count = salidas.get(salidaKeysCopia.get(i));
+                        if (count > maxSalidas) {
+                            maxSalidas = count;
+                        }
+                    }
+
+                    // Encontrar máximo de llegadas
+                    int maxLlegadas = 0;
+                    SetADT<String> tempKeyLlegadas = llegadas.getKeys();
+                    LinkedListADT<String> llegadaKeysCopia = new DynamicLinkedListADT<>();
+                    while (!tempKeyLlegadas.isEmpty()) {
+                        String key = tempKeyLlegadas.choose();
+                        llegadaKeysCopia.add(key);
+                        tempKeyLlegadas.remove(key);
+                    }
+
+                    for (int i = 0; i < llegadaKeysCopia.size(); i++) {
+                        int count = llegadas.get(llegadaKeysCopia.get(i));
+                        if (count > maxLlegadas) {
+                            maxLlegadas = count;
+                        }
+                    }
+
+                    // Mostrar terminales con máximas salidas
+                    System.out.println("\n--- TERMINALES CON MÁS SALIDAS ---");
+                    if (maxSalidas > 0) {
+                        for (int i = 0; i < salidaKeysCopia.size(); i++) {
+                            String codigo = salidaKeysCopia.get(i);
+                            int count = salidas.get(codigo);
+                            if (count == maxSalidas) {
+                                System.out.println("- " + codigo + " (" + count + " salidas)");
+                            }
+                        }
+                    }
+
+                    // Mostrar terminales con máximas llegadas
+                    System.out.println("\n--- TERMINALES CON MÁS LLEGADAS ---");
+                    if (maxLlegadas > 0) {
+                        for (int i = 0; i < llegadaKeysCopia.size(); i++) {
+                            String codigo = llegadaKeysCopia.get(i);
+                            int count = llegadas.get(codigo);
+                            if (count == maxLlegadas) {
+                                System.out.println("- " + codigo + " (" + count + " llegadas)");
+                            }
+                        }
+                    }
                     break;
                 case "0":
                     volver = true;

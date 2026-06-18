@@ -24,16 +24,15 @@ public class DinamicSetADT<T> implements SetADT<T> {
         if (isEmpty()) {
             return false;
         }
-        pointer = head;
-        for (int i = 0; i < size; i++) {
-            T val = pointer.getValue();
+        Nodo<T> actual = head;
+        while (actual != null) {
+            T val = actual.getValue();
             if (val == null) {
                 if (value == null) return true;
             } else if (val.equals(value)) {
                 return true;
-            } else {
-                pointer = pointer.getNext();
             }
+            actual = actual.getNext();
         }
         return false;
     }
@@ -59,21 +58,26 @@ public class DinamicSetADT<T> implements SetADT<T> {
     public void remove(T value) {
         if (isEmpty()) {
             throw new EmptyADTException("El conjunto esta vacio");
-        } else if (!exist(value)) {
-            throw new TDAs.exceptions.ElementNotFoundADTException("El valor '" + value + "' no existe");
-        } else {
-            pointer = head;
-            if (pointer.getValue() == value) {
-                head = null;
-                size--;
-            } else {
-                while (pointer.getNext().getValue() != value) {
-                    pointer = pointer.getNext();
-                }
-                pointer.setNext(pointer.getNext().getNext());
-                size--;
-            }
         }
+
+        if ((head.getValue() == null && value == null) || (head.getValue() != null && head.getValue().equals(value))) {
+            head = head.getNext(); // Desplazamos la cabeza al siguiente, NO a null
+            size--;
+            return;
+        }
+
+        Nodo<T> actual = head;
+        while (actual.getNext() != null) {
+            T nextVal = actual.getNext().getValue();
+            if ((nextVal == null && value == null) || (nextVal != null && nextVal.equals(value))) {
+                actual.setNext(actual.getNext().getNext()); // Saltamos el nodo eliminado
+                size--;
+                return;
+            }
+            actual = actual.getNext();
+        }
+
+        throw new TDAs.exceptions.ElementNotFoundADTException("El valor '" + value + "' no existe");
     }
 
     @Override

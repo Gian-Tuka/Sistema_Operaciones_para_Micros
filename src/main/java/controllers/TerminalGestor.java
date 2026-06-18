@@ -5,6 +5,7 @@ import TDAs.structure.definition.SetADT;
 import TDAs.structure.definition.SimpleDictionaryADT;
 import TDAs.structure.implementation.dynamic.DynamicLinkedListADT;
 import TDAs.structure.implementation.dynamic.DynamicSimpleDictionaryADT;
+import exception.InvalidInputException;
 import models.Terminal;
 import exception.DuplicateTerminalException;
 import exception.TerminalNotFoundException;
@@ -17,14 +18,25 @@ public class TerminalGestor {
         this.terminales = new DynamicSimpleDictionaryADT<>();
     }
 
+    private static final String[] PROVINCIAS_ARGENTINAS = {
+            "BUE", "COR", "ROS", "MDZ", "SLA", "TUC", "SFE", "NQN",
+            "BRC", "POS", "RGL", "RES", "SDE", "TRE", "CHC", "FOR",
+            "SGO", "LPA", "CAT", "JUJ", "MZA", "RNE", "SLU", "TDF"
+    };
+
     public void agregarTerminal(Terminal terminal) {
-        // Normalizar codigo a mayúsculas para evitar problemas de coincidencia
         String codigo = terminal.getCodigo() != null ? terminal.getCodigo().trim().toUpperCase() : "";
-        terminal.setCodigo(codigo);
-        // Evitar llamar a get() sobre un diccionario vacío: usar getKeys().exist()
-        if (terminales.getKeys().exist(codigo)) {
-            throw new DuplicateTerminalException("Terminal con codigo " + codigo + " ya existe");
+
+        if (!esProvinciaValida(codigo)) {
+            throw new InvalidInputException("Código '" + codigo + "' no es una provincia argentina válida");
         }
+
+        terminal.setCodigo(codigo);
+
+        if (terminales.getKeys().exist(codigo)) {
+            throw new DuplicateTerminalException("Terminal con código " + codigo + " ya existe");
+        }
+
         terminales.add(codigo, terminal);
         GrafoRutas.getInstance().agregarTerminal(terminal);
     }
@@ -62,7 +74,14 @@ public class TerminalGestor {
         return lista;
     }
 
-    public boolean existeTerminal(String codigo) {
-        return terminales.getKeys().exist(codigo);
+    public boolean existeTerminal(String codigo) {return terminales.getKeys().exist(codigo);}
+
+    private boolean esProvinciaValida(String codigo) {
+        for (String provincia : PROVINCIAS_ARGENTINAS) {
+            if (provincia.equals(codigo)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
