@@ -1,29 +1,31 @@
 package models;
 
 public class Micro {
-    private String patente;     // Identificador único (patente o interno)
-    private String tipo;        // Ejecutivo, Semi-cama, Cama [cite: 366]
-    private boolean disponible; // Control de disponibilidad
+    private String idPatente;
+    private TipoMicro tipo;
+    private boolean disponible;
+    private int cantidadAsignaciones;
 
-    public Micro(String patente, String tipo) {
-        this.patente = patente;
+    public Micro(String idPatente, TipoMicro tipo) {
+        this.idPatente = idPatente;
         this.tipo = tipo;
-        this.disponible = true; // Por defecto todo micro nuevo inicia disponible
+        this.disponible = true;
+        this.cantidadAsignaciones = 0;
     }
 
-    public String getPatente() {
-        return patente;
+    public String getIdPatente() {
+        return idPatente;
     }
 
-    public void setPatente(String patente) {
-        this.patente = patente;
+    public void setIdPatente(String idPatente) {
+        this.idPatente = idPatente;
     }
 
-    public String getTipo() {
+    public TipoMicro getTipo() {
         return tipo;
     }
 
-    public void setTipo(String tipo) {
+    public void setTipo(TipoMicro tipo) {
         this.tipo = tipo;
     }
 
@@ -35,21 +37,29 @@ public class Micro {
         this.disponible = disponible;
     }
 
+    public int getCantidadAsignaciones() {
+        return cantidadAsignaciones;
+    }
+
+    public void incrementarAsignaciones() {
+        this.cantidadAsignaciones++;
+    }
+
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Micro micro = (Micro) obj;
-        return patente != null && patente.equalsIgnoreCase(micro.patente);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Micro micro = (Micro) o;
+        return idPatente.equals(micro.idPatente);
     }
 
     @Override
     public int hashCode() {
-        return patente != null ? patente.toLowerCase().hashCode() : 0;
+        return idPatente.hashCode();
     }
 
     @Override
     public String toString() {
-        return "Micro Patente: " + patente + " (" + tipo + ")";
+        return "Micro " + idPatente + " [" + tipo + "] - " + (disponible ? "Disponible" : "Asignado") + " | Asignaciones: " + cantidadAsignaciones;
     }
 }

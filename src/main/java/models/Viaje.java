@@ -1,14 +1,15 @@
 package models;
 
 public class Viaje {
+    private String idViaje;
     private Terminal origen;
     private Terminal destino;
     private Micro micro;
     private String fecha;
     private int prioridad;
 
-
-    public Viaje(Terminal origen, Terminal destino, Micro micro, String fecha, int prioridad) {
+    public Viaje(String idViaje, Terminal origen, Terminal destino, Micro micro, String fecha, int prioridad) {
+        this.idViaje = idViaje;
         this.origen = origen;
         this.destino = destino;
         this.micro = micro;
@@ -16,20 +17,16 @@ public class Viaje {
         this.prioridad = prioridad;
     }
 
+    public String getIdViaje() {
+        return idViaje;
+    }
+
     public Terminal getOrigen() {
         return origen;
     }
 
-    public void setOrigen(Terminal origen) {
-        this.origen = origen;
-    }
-
     public Terminal getDestino() {
         return destino;
-    }
-
-    public void setDestino(Terminal destino) {
-        this.destino = destino;
     }
 
     public Micro getMicro() {
@@ -52,13 +49,14 @@ public class Viaje {
         return prioridad;
     }
 
-    public void setPrioridad(int prioridad) { // Permite modificar la prioridad [cite: 375]
+    public void setPrioridad(int prioridad) {
         this.prioridad = prioridad;
     }
 
     @Override
     public String toString() {
-        return "Viaje: " + origen.getCodigo() + " -> " + destino.getCodigo() +
-                " | Fecha: " + fecha + " | Prioridad: " + prioridad + " | Micro: " + micro.getPatente();
+        return "Viaje [" + idViaje + "] - " + fecha + " | Prioridad: " + prioridad + "\n" +
+               "Ruta: " + origen.getCodigo() + " -> " + destino.getCodigo() + "\n" +
+               "Micro: " + (micro != null ? micro.getIdPatente() : "No asignado");
     }
 }
