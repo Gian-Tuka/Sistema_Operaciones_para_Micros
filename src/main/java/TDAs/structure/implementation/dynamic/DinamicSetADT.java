@@ -26,7 +26,10 @@ public class DinamicSetADT<T> implements SetADT<T> {
         }
         pointer = head;
         for (int i = 0; i < size; i++) {
-            if (pointer.getValue() == value) {
+            T val = pointer.getValue();
+            if (val == null) {
+                if (value == null) return true;
+            } else if (val.equals(value)) {
                 return true;
             } else {
                 pointer = pointer.getNext();

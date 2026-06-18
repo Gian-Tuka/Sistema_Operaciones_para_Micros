@@ -18,11 +18,14 @@ public class TerminalGestor {
     }
 
     public void agregarTerminal(Terminal terminal) {
+        // Normalizar codigo a mayúsculas para evitar problemas de coincidencia
+        String codigo = terminal.getCodigo() != null ? terminal.getCodigo().trim().toUpperCase() : "";
+        terminal.setCodigo(codigo);
         // Evitar llamar a get() sobre un diccionario vacío: usar getKeys().exist()
-        if (terminales.getKeys().exist(terminal.getCodigo())) {
-            throw new DuplicateTerminalException("Terminal con codigo " + terminal.getCodigo() + " ya existe");
+        if (terminales.getKeys().exist(codigo)) {
+            throw new DuplicateTerminalException("Terminal con codigo " + codigo + " ya existe");
         }
-        terminales.add(terminal.getCodigo(), terminal);
+        terminales.add(codigo, terminal);
         GrafoRutas.getInstance().agregarTerminal(terminal);
     }
 

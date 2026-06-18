@@ -81,9 +81,9 @@ public class ConsoleMenu {
                     try {
                         // Origen
                         Terminal origen = null;
-                        while (origen == null) {
-                            System.out.print("Codigo Origen: ");
-                            String codOrigen = scanner.nextLine().trim();
+                            while (origen == null) {
+                                    System.out.print("Codigo Origen: ");
+                                    String codOrigen = scanner.nextLine().trim().toUpperCase();
                             if (codOrigen.isEmpty()) {
                                 System.out.println("Error: Codigo de origen no puede estar vacío.");
                                 continue;
@@ -97,9 +97,9 @@ public class ConsoleMenu {
 
                         // Destino
                         Terminal destino = null;
-                        while (destino == null) {
-                            System.out.print("Codigo Destino: ");
-                            String codDestino = scanner.nextLine().trim();
+                            while (destino == null) {
+                                    System.out.print("Codigo Destino: ");
+                                    String codDestino = scanner.nextLine().trim().toUpperCase();
                             if (codDestino.isEmpty()) {
                                 System.out.println("Error: Codigo de destino no puede estar vacío.");
                                 continue;
@@ -349,9 +349,9 @@ public class ConsoleMenu {
                     }
                     break;
                 case "3":
-                    System.out.print("Código a eliminar: ");
+                        System.out.print("Código a eliminar: ");
                     try {
-                        String codigoEliminar = scanner.nextLine().trim();
+                        String codigoEliminar = scanner.nextLine().trim().toUpperCase();
                         terminalGestor.eliminarTerminal(codigoEliminar);
                         System.out.println("Eliminada.");
                     } catch (TerminalNotFoundException e) {
@@ -362,7 +362,7 @@ public class ConsoleMenu {
                     break;
                 case "4":
                     System.out.print("Código Terminal para ver conexiones directas: ");
-                    Terminal t = terminalGestor.obtenerTerminal(scanner.nextLine());
+                    Terminal t = terminalGestor.obtenerTerminal(scanner.nextLine().trim().toUpperCase());
                     if (t != null) {
                         LinkedListADT<Terminal> todas = terminalGestor.listarTerminales();
                         System.out.println("Conexiones directas desde " + t.getCodigo() + ":");
@@ -402,9 +402,9 @@ public class ConsoleMenu {
             switch (opcion) {
                 case "1":
                     System.out.print("Origen: ");
-                    Terminal o = terminalGestor.obtenerTerminal(scanner.nextLine());
+                    Terminal o = terminalGestor.obtenerTerminal(scanner.nextLine().trim().toUpperCase());
                     System.out.print("Destino: ");
-                    Terminal d = terminalGestor.obtenerTerminal(scanner.nextLine());
+                    Terminal d = terminalGestor.obtenerTerminal(scanner.nextLine().trim().toUpperCase());
                     System.out.print("Máximo paradas intermedias: ");
                     int maxP = Integer.parseInt(scanner.nextLine());
                     if (o != null && d != null) {
@@ -423,9 +423,9 @@ public class ConsoleMenu {
                 case "2":
                     try {
                         System.out.print("Origen: ");
-                        String oCod = scanner.nextLine().trim();
+                        String oCod = scanner.nextLine().trim().toUpperCase();
                         System.out.print("Destino: ");
-                        String dCod = scanner.nextLine().trim();
+                        String dCod = scanner.nextLine().trim().toUpperCase();
                         if (!terminalGestor.existeTerminal(oCod) || !terminalGestor.existeTerminal(dCod)) {
                             throw new TerminalNotFoundException("Ambas terminales deben existir para crear la ruta");
                         }
@@ -452,9 +452,9 @@ public class ConsoleMenu {
                 case "3":
                     try {
                         System.out.print("Origen: ");
-                        String oCod = scanner.nextLine().trim();
+                        String oCod = scanner.nextLine().trim().toUpperCase();
                         System.out.print("Destino: ");
-                        String dCod = scanner.nextLine().trim();
+                        String dCod = scanner.nextLine().trim().toUpperCase();
                         if (!terminalGestor.existeTerminal(oCod) || !terminalGestor.existeTerminal(dCod)) {
                             throw new TerminalNotFoundException("Ambas terminales deben existir para eliminar la ruta");
                         }
